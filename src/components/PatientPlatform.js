@@ -1,17 +1,17 @@
 'use client';
 
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { useMemo, useState, useEffect, useRef } from 'react';
 import QRCode from 'qrcode';
 import { patientProfile } from '@/data/patientMockData';
+import Header from '@/components/Header';
 import styles from './PatientPlatform.module.css';
 
 const sectionButtons = [
-  { key: 'notifs', label: 'Notifs' },
-  { key: 'dossier', label: 'Dossier' },
-  { key: 'ordonnances', label: 'Ordonnance' },
-  { key: 'rdv', label: 'Rendez-vous' },
+  { key: 'home', label: 'Accueil', icon: <svg style={{ width: 15, height: 15 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 11.5 12 4l9 7.5" /><path d="M5.5 10.5V20h13V10.5" /></svg> },
+  { key: 'notifs', label: 'Notifications', icon: <svg style={{ width: 15, height: 15 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg> },
+  { key: 'dossier', label: 'Dossier Medical', icon: <svg style={{ width: 15, height: 15 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /></svg> },
+  { key: 'ordonnances', label: 'Ordonnances', icon: <svg style={{ width: 15, height: 15 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z" /><path d="m8.5 8.5 7 7" /></svg> },
+  { key: 'rdv', label: 'Rendez-vous', icon: <svg style={{ width: 15, height: 15 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg> },
 ];
 
 function detectLanguage(text) {
@@ -105,7 +105,6 @@ function replyFromContext(text, lang) {
 }
 
 export default function PatientPlatform() {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState('home');
   const [unreadNotifs] = useState(1);
   const [language, setLanguage] = useState('darija');
@@ -319,50 +318,33 @@ export default function PatientPlatform() {
 
   const chatDir = language === 'ar' ? 'rtl' : 'ltr';
   const shellDir = language === 'ar' ? 'rtl' : 'ltr';
-  const canGoBack = activeTab !== 'home';
+
+  const patientFullName = patientProfile.fullName || patientProfile.firstName || 'Patient';
+  const patientInitials = patientFullName.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase() || 'P';
 
   return (
-    <div className={`${styles.shell} ${language === 'ar' ? styles.rtl : ''}`} dir={shellDir}>
-      <header className={styles.topBar}>
-        <button
-          type="button"
-          className={styles.logoMini}
-          onClick={() => router.push('/role')}
-          aria-label="Aller au choix Patient ou Medecin"
-        >
-          <Image src="/logo-official-nobg.png" alt="Alwarid" fill sizes="440px" className={styles.logoImage} />
-        </button>
-      </header>
+    <div className="app-shell" dir={shellDir}>
+      <Header
+        userName={patientFullName}
+        userRole="Patient"
+        userInitials={patientInitials}
+        showBack={activeTab !== 'home'}
+        onBack={activeTab !== 'home' ? handleBack : undefined}
+        hideEpidemie
+      />
 
-      <div className={styles.greetingRow}>
-        <div className={styles.greetingLine}>
-          <p className={styles.greeting}>Bonjour, {patientProfile.firstName}</p>
-        </div>
-        <p className={styles.muted}>{patientProfile.id}</p>
-      </div>
-
-      <div className={styles.topActions}>
-        {canGoBack ? (
-          <button className={styles.backBtn} onClick={handleBack} aria-label="Accueil patient">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M3 11.5 12 4l9 7.5" />
-              <path d="M5.5 10.5V20h13V10.5" />
-            </svg>
-          </button>
-        ) : null}
-      </div>
-
-      <nav className={styles.sectionNav}>
+      <nav className="tab-nav">
         {sectionButtons.map((section) => (
           <button
             key={section.key}
-            className={activeTab === section.key ? styles.sectionBtnActive : styles.sectionBtn}
+            className={`tab-item${activeTab === section.key ? ' active' : ''}`}
             onClick={() => handleTabChange(section.key)}
           >
-            <span className={styles.sectionBtnInner}>
-              <span>{section.label}</span>
-              {section.key === 'notifs' && unreadNotifs > 0 ? <span className={styles.sectionBadge}>+{unreadNotifs}</span> : null}
-            </span>
+            {section.icon}
+            {section.label}
+            {section.key === 'notifs' && unreadNotifs > 0 ? (
+              <span className={styles.sectionBadge}>{unreadNotifs}</span>
+            ) : null}
           </button>
         ))}
       </nav>
@@ -387,38 +369,148 @@ export default function PatientPlatform() {
 
         {activeTab === 'home' && (
           <section className={styles.stack}>
-            <div className={styles.cardRow}>
-              <article className={styles.card}>
-                <h3>📅 Prochaine consultation</h3>
-                <p className={styles.cardMain}>{patientProfile.nextAppointment.date}</p>
-                <p>{patientProfile.nextAppointment.doctor} - {patientProfile.nextAppointment.specialty}</p>
-                <p className={styles.okText}>🟢 Dans 3 jours</p>
-              </article>
-              <article className={styles.card}>
-                <h3>📊 Derniere visite</h3>
-                <p className={styles.cardMain}>{patientProfile.lastVisit.date}</p>
-                <p>Tension: 12/8 ✅ Normale</p>
-                <p className={styles.muted}>{patientProfile.lastVisit.department} - {patientProfile.lastVisit.location}</p>
+
+            {/* ── Row 1: 4 KPI stat cards ── */}
+            <div className={styles.statsRow}>
+              <div className={styles.kpiCard}>
+                <span className={styles.kpiIcon} style={{ background: '#e6f6fd' }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#29a2dd" strokeWidth="2"><rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </span>
+                <div>
+                  <p className={styles.kpiLabel}>Prochain RDV</p>
+                  <p className={styles.kpiValue}>4 avril</p>
+                  <p className={styles.kpiSub}>Dr. Alaoui · Cardio</p>
+                </div>
+              </div>
+              <div className={styles.kpiCard}>
+                <span className={styles.kpiIcon} style={{ background: '#f0fdf4' }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                </span>
+                <div>
+                  <p className={styles.kpiLabel}>Tension</p>
+                  <p className={styles.kpiValue}>12/8</p>
+                  <p className={styles.kpiSub} style={{ color: '#16a34a' }}>Normale</p>
+                </div>
+              </div>
+              <div className={styles.kpiCard}>
+                <span className={styles.kpiIcon} style={{ background: '#fefce8' }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" strokeWidth="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+                </span>
+                <div>
+                  <p className={styles.kpiLabel}>HbA1c</p>
+                  <p className={styles.kpiValue}>7.8%</p>
+                  <p className={styles.kpiSub}>Stable · Jan 2026</p>
+                </div>
+              </div>
+              <div className={styles.kpiCard}>
+                <span className={styles.kpiIcon} style={{ background: '#fdf2f8' }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9333ea" strokeWidth="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </span>
+                <div>
+                  <p className={styles.kpiLabel}>SpO2</p>
+                  <p className={styles.kpiValue}>98%</p>
+                  <p className={styles.kpiSub}>28 mars 2026</p>
+                </div>
+              </div>
+            </div>
+
+            {/* ── Row 2: main dashboard grid (3/5 + 2/5) ── */}
+            <div className={styles.dashGrid}>
+
+              {/* Left column */}
+              <div className={styles.stack}>
+                {/* Hero appointment card */}
+                <article className={styles.appointmentCard}>
+                  <div className={styles.appointmentCardHeader}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Prochaine consultation
+                  </div>
+                  <div className={styles.appointmentCardBody}>
+                    <p className={styles.appointmentDate}>{patientProfile.nextAppointment.date}</p>
+                    <p className={styles.appointmentMeta}>
+                      {patientProfile.nextAppointment.doctor} · {patientProfile.nextAppointment.specialty}
+                    </p>
+                    <p className={styles.appointmentMeta} style={{ marginBottom: 14, opacity: 0.7 }}>
+                      {patientProfile.nextAppointment.location}
+                    </p>
+                    <span className={styles.appointmentChip}>
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="#4ade80"><circle cx="12" cy="12" r="10"/></svg>
+                      Dans 3 jours
+                    </span>
+                  </div>
+                </article>
+
+                {/* Suivi glycemique compact */}
+                <article className={styles.card}>
+                  <div className={styles.rowBetween}>
+                    <div>
+                      <h3 style={{ marginBottom: 4 }}>Suivi glycemique</h3>
+                      <p className={styles.muted}>Depuis 20 mars · Matin + Soir</p>
+                    </div>
+                    <span style={{ fontSize: 11, background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', borderRadius: 999, padding: '4px 12px', fontWeight: 700, whiteSpace: 'nowrap' }}>Actif ✓</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 16, alignItems: 'center' }}>
+                    <button className={styles.primaryBtn} onClick={() => handleTabChange('rdv')} style={{ flex: 1 }}>Ouvrir mon suivi</button>
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      {[{ s: 'done' }, { s: 'done' }, { s: 'done' }, { s: 'done' }, { s: 'missed' }, { s: 'empty' }, { s: 'empty' }].map((d, i) => (
+                        <span key={i} className={`${styles.dayDot} ${d.s === 'done' ? styles.dayDotDone : d.s === 'missed' ? styles.dayDotMissed : styles.dayDotEmpty}`} style={{ width: 16, height: 16 }}>
+                          {d.s === 'done' && <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </article>
+              </div>
+
+              {/* Right column: dossier rapide */}
+              <article className={styles.card} style={{ height: '100%' }}>
+                <h3 style={{ marginBottom: 4 }}>Mon dossier rapide</h3>
+                <p className={styles.muted} style={{ marginBottom: 16 }}>Acces direct a vos informations de sante</p>
+                <div className={styles.quickAccessList}>
+                  <button className={styles.quickAccessItem} onClick={() => handleQuickAccess('diabete')}>
+                    <span className={styles.quickAccessIcon} style={{ background: '#fef9c3' }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" strokeWidth="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+                    </span>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 600, fontSize: 13 }}>Pathologies</div>
+                      <div style={{ fontSize: 11, color: '#64748b' }}>Diabete, Hypertension</div>
+                    </div>
+                    <svg className={styles.quickAccessChevron} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m9 18 6-6-6-6"/></svg>
+                  </button>
+                  <button className={styles.quickAccessItem} onClick={() => handleQuickAccess('meds')}>
+                    <span className={styles.quickAccessIcon} style={{ background: '#d0eef9' }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#29a2dd" strokeWidth="2"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>
+                    </span>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 600, fontSize: 13 }}>Medicaments</div>
+                      <div style={{ fontSize: 11, color: '#64748b' }}>{patientProfile.medications.length} en cours</div>
+                    </div>
+                    <svg className={styles.quickAccessChevron} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m9 18 6-6-6-6"/></svg>
+                  </button>
+                  <button className={styles.quickAccessItem} onClick={() => handleQuickAccess('allergies')}>
+                    <span className={styles.quickAccessIcon} style={{ background: '#fee2e2' }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                    </span>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 600, fontSize: 13 }}>Allergies</div>
+                      <div style={{ fontSize: 11, color: '#dc2626', fontWeight: 600 }}>{patientProfile.allergies.length} allergie connue</div>
+                    </div>
+                    <svg className={styles.quickAccessChevron} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m9 18 6-6-6-6"/></svg>
+                  </button>
+                  <button className={styles.quickAccessItem} onClick={() => handleTabChange('ordonnances')}>
+                    <span className={styles.quickAccessIcon} style={{ background: '#f3e8ff' }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9333ea" strokeWidth="2"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>
+                    </span>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 600, fontSize: 13 }}>Ordonnances</div>
+                      <div style={{ fontSize: 11, color: '#64748b' }}>{patientProfile.prescriptions.length} ordonnances</div>
+                    </div>
+                    <svg className={styles.quickAccessChevron} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m9 18 6-6-6-6"/></svg>
+                  </button>
+                </div>
               </article>
             </div>
 
-            <article className={styles.card}>
-              <h3>Mon dossier rapide</h3>
-              <div className={styles.pills}>
-                <button className={`${styles.quickPill} ${styles.stagger1}`} onClick={() => handleQuickAccess('diabete')}>🩺 Diabete</button>
-                <button className={`${styles.quickPill} ${styles.stagger2}`} onClick={() => handleQuickAccess('meds')}>💊 Medicaments</button>
-                <button className={`${styles.quickPill} ${styles.stagger3}`} onClick={() => handleQuickAccess('allergies')}>⚠️ Allergies</button>
-              </div>
-            </article>
-
-            <article className={styles.card}>
-              <div className={styles.rowBetween}>
-                <h3>Suivi glycemique</h3>
-                <button className={styles.secondaryBtn} onClick={() => setActiveFollowup('suivi')}>Voir</button>
-              </div>
-              <p className={styles.muted}>Actif depuis 20 mars - module active par le medecin.</p>
-              <button className={styles.primaryBtn} onClick={() => handleTabChange('rdv')}>Ouvrir mon suivi</button>
-            </article>
           </section>
         )}
 
@@ -438,146 +530,191 @@ export default function PatientPlatform() {
               </article>
             ) : null}
 
-            <article className={styles.card}>
-              <button className={styles.accordionHeader} onClick={() => toggleSection('allergies')}>
-                <span>🔴 ALLERGIES</span>
-                <span className={expandedSections.allergies ? styles.arrowOpen : styles.arrow}>›</span>
-              </button>
-              {expandedSections.allergies && (
-                <div className={styles.accordionBody}>
-                  {patientProfile.allergies.map((a) => (
-                    <div key={a} className={styles.medCard}>{a} • Allergie</div>
-                  ))}
-                </div>
-              )}
-            </article>
-
-            <article className={styles.card}>
-              <button className={styles.accordionHeader} onClick={() => toggleSection('meds')}>
-                <span>💊 MES MEDICAMENTS</span>
-                <span className={expandedSections.meds ? styles.arrowOpen : styles.arrow}>›</span>
-              </button>
-              {expandedSections.meds && (
-                <div className={styles.accordionBody}>
-                  {patientProfile.medications.map((m) => (
-                    <div key={m.name} className={styles.medCard}>
-                      <strong>{m.name}</strong>
-                      <p>{m.dosage} - {m.purpose}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </article>
-
-            <article className={styles.card}>
-              <button className={styles.accordionHeader} onClick={() => toggleSection('conditions')}>
-                <span>🩺 MES PATHOLOGIES</span>
-                <span className={expandedSections.conditions ? styles.arrowOpen : styles.arrow}>›</span>
-              </button>
-              {expandedSections.conditions && (
-                <div className={styles.accordionBody}>
-                  {patientProfile.conditions
-                    .filter((c) => (dossierQuickFocus === 'diabete' ? c.name.toLowerCase().includes('diabet') : true))
-                    .map((c) => (
-                    <div key={c.name} className={styles.medCard}>
-                      <strong>{c.name}</strong>
-                      <p>Diagnostique en {c.since}</p>
-                    </div>
+            <div className={styles.threeCol}>
+              <article className={styles.card}>
+                <button className={styles.accordionHeader} onClick={() => toggleSection('allergies')}>
+                  <span>ALLERGIES</span>
+                  <span className={expandedSections.allergies ? styles.arrowOpen : styles.arrow}>›</span>
+                </button>
+                {expandedSections.allergies && (
+                  <div className={styles.accordionBody}>
+                    {patientProfile.allergies.map((a) => (
+                      <div key={a} className={styles.medCard}>{a} • Allergie</div>
                     ))}
-                </div>
-              )}
-            </article>
+                  </div>
+                )}
+              </article>
+
+              <article className={styles.card}>
+                <button className={styles.accordionHeader} onClick={() => toggleSection('meds')}>
+                  <span>MES MEDICAMENTS</span>
+                  <span className={expandedSections.meds ? styles.arrowOpen : styles.arrow}>›</span>
+                </button>
+                {expandedSections.meds && (
+                  <div className={styles.accordionBody}>
+                    {patientProfile.medications.map((m) => (
+                      <div key={m.name} className={styles.medCard}>
+                        <strong>{m.name}</strong>
+                        <p>{m.dosage} - {m.purpose}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </article>
+
+              <article className={styles.card}>
+                <button className={styles.accordionHeader} onClick={() => toggleSection('conditions')}>
+                  <span>MES PATHOLOGIES</span>
+                  <span className={expandedSections.conditions ? styles.arrowOpen : styles.arrow}>›</span>
+                </button>
+                {expandedSections.conditions && (
+                  <div className={styles.accordionBody}>
+                    {patientProfile.conditions
+                      .filter((c) => (dossierQuickFocus === 'diabete' ? c.name.toLowerCase().includes('diabet') : true))
+                      .map((c) => (
+                        <div key={c.name} className={styles.medCard}>
+                          <strong>{c.name}</strong>
+                          <p>Diagnostique en {c.since}</p>
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </article>
+            </div>
           </section>
         )}
 
         {activeTab === 'ordonnances' && (
           <section className={styles.stack}>
-            {patientProfile.prescriptions.map((p) => (
-              <article key={p.id} className={`${styles.card} ${selectedPrescriptionId === p.id ? styles.cardActive : ''}`}>
-                <div className={styles.rowBetween}>
-                  <h3>Ordonnance du {p.date}</h3>
-                  <span className={p.status.includes('Expiree') ? styles.badgeMuted : styles.badgeOk}>{p.status}</span>
-                </div>
-                <p>{p.doctor} - {p.specialty}</p>
-                <ul className={styles.list}>
-                  {p.items.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-                <button className={styles.primaryBtn} onClick={() => setSelectedPrescriptionId(p.id)}>Afficher QR code</button>
-              </article>
-            ))}
+            <div className={styles.twoCol}>
+              <div className={styles.stack}>
+                {patientProfile.prescriptions.map((p) => (
+                  <article key={p.id} className={`${styles.card} ${selectedPrescriptionId === p.id ? styles.cardActive : ''}`}>
+                    <div className={styles.rowBetween}>
+                      <h3>Ordonnance du {p.date}</h3>
+                      <span className={p.status.includes('Expiree') ? styles.badgeMuted : styles.badgeOk}>{p.status}</span>
+                    </div>
+                    <p style={{ fontSize: 13, color: '#475569', margin: '4px 0 10px' }}>{p.doctor} · {p.specialty}</p>
+                    <ul className={styles.list}>
+                      {p.items.map((item) => (
+                        <li key={item} style={{ fontSize: 13, padding: '4px 0', borderBottom: '1px solid #f1f5f9' }}>{item}</li>
+                      ))}
+                    </ul>
+                    <button className={styles.primaryBtn} style={{ marginTop: 12, width: '100%' }} onClick={() => setSelectedPrescriptionId(p.id)}>Afficher QR code</button>
+                  </article>
+                ))}
+              </div>
 
-            {selectedPrescription && (
-              <article className={styles.qrCard}>
-                <h3>QR code pharmacie</h3>
-                <p className={styles.muted}>Montrez ce code au pharmacien.</p>
-                <div className={styles.qrBox}>
-                  {qrDataUrl ? <img src={qrDataUrl} alt="QR ordonnance" width="160" height="160" className={styles.qrImage} /> : <p>Generation...</p>}
-                </div>
-                <p className={styles.muted}>Code: {selectedPrescription.id}</p>
-                <p className={styles.muted}>Valide jusqu'au: {selectedPrescription.expiresAt}</p>
-              </article>
-            )}
+              {selectedPrescription && (
+                <article className={styles.qrCard}>
+                  <h3>QR code pharmacie</h3>
+                  <p className={styles.muted} style={{ marginBottom: 16 }}>Montrez ce code au pharmacien.</p>
+                  <div className={styles.qrBox} style={{ width: 200, height: 200, margin: '0 auto 16px' }}>
+                    {qrDataUrl ? <img src={qrDataUrl} alt="QR ordonnance" width="196" height="196" className={styles.qrImage} /> : <p>Generation...</p>}
+                  </div>
+                  <p className={styles.muted}>Code: {selectedPrescription.id}</p>
+                  <p className={styles.muted}>Valide jusqu&apos;au: {selectedPrescription.expiresAt}</p>
+                </article>
+              )}
+            </div>
           </section>
         )}
 
         {activeTab === 'rdv' && (
           <section className={styles.stack}>
+            <div className={styles.twoCol}>
+
+            {/* Consultations */}
             <article className={styles.card}>
-              <h3>Mes consultations</h3>
-              <ul className={styles.timeline}>
-                {patientProfile.consultations.map((c) => (
-                  <li key={`${c.date}-${c.title}`}>
-                    <span className={c.upcoming ? styles.dotUpcoming : styles.dotPast}></span>
-                    <div>
-                      <p className={styles.cardMain}>{c.date} - {c.title}</p>
-                      <p>{c.doctor}</p>
-                      <p className={styles.muted}>{c.hospital}</p>
+              <div className={styles.rowBetween}>
+                <h3>Mes consultations</h3>
+                <span className={styles.muted}>{patientProfile.consultations.length} au total</span>
+              </div>
+              <div className={styles.consultationList}>
+                {patientProfile.consultations.map((c) => {
+                  const parts = c.date.split(' ');
+                  const day = parts[0];
+                  const month = parts[1] ? parts[1].slice(0, 3) : '';
+                  return (
+                    <div key={`${c.date}-${c.title}`} className={`${styles.consultationCard} ${c.upcoming ? styles.consultationCardUpcoming : ''}`}>
+                      <div className={`${styles.consultationDateBadge} ${c.upcoming ? styles.consultationDateBadgeUpcoming : ''}`}>
+                        <span className={styles.consultationDateDay}>{day}</span>
+                        <span className={styles.consultationDateMonth}>{month}</span>
+                      </div>
+                      <div className={styles.consultationInfo}>
+                        <p className={styles.consultationTitle}>{c.title}</p>
+                        <p className={styles.consultationDoctor}>{c.doctor}</p>
+                        <p className={styles.consultationHospital}>{c.hospital}</p>
+                        {c.upcoming && <span className={styles.upcomingBadge}>A venir</span>}
+                      </div>
                     </div>
-                  </li>
-                ))}
-              </ul>
+                  );
+                })}
+              </div>
             </article>
 
+            {/* Suivi glycemique */}
             <article className={styles.card}>
-              <h3>Suivi glycemique</h3>
-              <p className={styles.muted}>Actif depuis 20 mars - Frequence: matin + soir</p>
+              <div className={styles.glycemicHeader}>
+                <h3>Suivi glycemique</h3>
+                <span className={styles.glycemicStreak}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                  5 jours de suite
+                </span>
+              </div>
+              <p className={styles.muted} style={{ marginBottom: 14 }}>Actif depuis 20 mars · Frequence: matin + soir</p>
 
-              <div className={styles.followupForm}>
-                <label>
-                  A jeun (g/L)
+              <div className={styles.glycemicInputs}>
+                <div>
+                  <span className={styles.glycemicLabel}>A jeun (g/L)</span>
                   <input
-                    className={styles.chatInput}
+                    className={styles.glycemicInput}
                     value={followupValues.fasting}
                     onChange={(e) => setFollowupValues((prev) => ({ ...prev, fasting: e.target.value }))}
+                    placeholder="0.00"
                   />
-                </label>
-                <label>
-                  Apres repas (g/L)
+                </div>
+                <div>
+                  <span className={styles.glycemicLabel}>Apres repas (g/L)</span>
                   <input
-                    className={styles.chatInput}
+                    className={styles.glycemicInput}
                     value={followupValues.postMeal}
                     onChange={(e) => setFollowupValues((prev) => ({ ...prev, postMeal: e.target.value }))}
+                    placeholder="0.00"
                   />
-                </label>
-                <button className={styles.primaryBtn} onClick={handleFollowupSubmit}>Valider</button>
+                </div>
               </div>
 
-              <div className={styles.followupWeek}>
-                {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, idx) => (
-                  <div key={`${day}-${idx}`} className={styles.dayCell}>
-                    <span>{day}</span>
-                    <span>{idx < 4 ? '✅' : idx === 4 ? '❌' : '⭕'}</span>
+              <button className={styles.glycemicSubmit} onClick={handleFollowupSubmit}>Enregistrer la mesure</button>
+
+              <div className={styles.weekTracker}>
+                {[
+                  { label: 'L', status: 'done' },
+                  { label: 'M', status: 'done' },
+                  { label: 'M', status: 'done' },
+                  { label: 'J', status: 'done' },
+                  { label: 'V', status: 'missed' },
+                  { label: 'S', status: 'empty' },
+                  { label: 'D', status: 'empty' },
+                ].map((d, idx) => (
+                  <div key={idx} className={styles.dayCell}>
+                    <span className={styles.dayName}>{d.label}</span>
+                    <span className={`${styles.dayDot} ${d.status === 'done' ? styles.dayDotDone : d.status === 'missed' ? styles.dayDotMissed : styles.dayDotEmpty}`}>
+                      {d.status === 'done' && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>}
+                      {d.status === 'missed' && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6 6 18M6 6l12 12"/></svg>}
+                    </span>
                   </div>
                 ))}
               </div>
-
-              <p className={styles.okText}>💬 5 jours de suivi ! Bravo</p>
+              <p className={styles.streakText}>Bravo ! 5 jours de suivi consecutifs</p>
             </article>
+
+            </div>
           </section>
         )}
       </main>
+
+      <footer className="page-footer">© 2026 Alwarid. All rights reserved.</footer>
 
       {!chatOpen && (
         <button className={styles.chatFab} onClick={openChat} aria-label="Ouvrir le chat">

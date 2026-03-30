@@ -87,7 +87,7 @@ export default function SuiviMode() {
                 {/* Patient header */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, padding: '16px 20px', background: 'var(--bg-card)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-lg)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                        <div className="patient-photo" style={{ width: 44, height: 44, fontSize: 14 }}>YA</div>
+                        <div className="patient-photo" style={{ width: 44, height: 44, fontSize: 14 }}>YK</div>
                         <div>
                             <div style={{ fontSize: 15, fontWeight: 600 }}>{patient.firstName} {patient.lastName}</div>
                             <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{patient.id} — Suivi glycemique — Diabete Type 2</div>

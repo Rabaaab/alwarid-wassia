@@ -416,10 +416,10 @@ Genere par Alwarid — Outil d'aide a la decision`}</pre>
                             width: 56, height: 56, borderRadius: 'var(--radius-md)', background: 'var(--primary-50)',
                             color: 'var(--primary-700)', display: 'flex', alignItems: 'center', justifyContent: 'center',
                             fontWeight: 700, fontSize: 20, flexShrink: 0
-                        }}>YA</div>
+                        }}>YK</div>
                         <div>
-                            <div style={{ fontSize: 20, fontWeight: 700 }}>Youssef El Amrani</div>
-                            <div style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: "'IBM Plex Mono', monospace" }}>PAT-2024-00147 — 58 ans, Homme</div>
+                            <div style={{ fontSize: 20, fontWeight: 700 }}>Youssef Kacimi</div>
+                            <div style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: "'IBM Plex Mono', monospace" }}>PAT-2024-00147 — 14 ans, Homme</div>
                         </div>
                     </div>
                     <div style={{ display: 'flex', gap: 12, flex: 1, justifyContent: 'center', flexWrap: 'wrap' }}>

@@ -1,8 +1,10 @@
 'use client';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './RoleSelector.module.css';
+
+const INTERNAL_HISTORY_KEY = 'alwarid:internal-history';
 
 export default function RoleSelector() {
   const router = useRouter();
@@ -13,6 +15,11 @@ export default function RoleSelector() {
     firstName: '',
     lastName: '',
   });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.sessionStorage.removeItem(INTERNAL_HISTORY_KEY);
+  }, []);
 
   const getDemoFormByRole = (role) => {
     if (role === 'medecin') {
@@ -26,7 +33,7 @@ export default function RoleSelector() {
     return {
       identifier: 'AB123456',
       firstName: 'Youssef',
-      lastName: 'El Amrani',
+      lastName: 'Kacimi',
     };
   };
 
@@ -55,7 +62,7 @@ export default function RoleSelector() {
       if (selectedRole === 'patient') {
         router.push('/patient');
       } else {
-        router.push('/dashboard');
+        router.push('/search');
       }
     }, 260);
   };

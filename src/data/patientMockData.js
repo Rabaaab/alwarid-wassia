@@ -1,6 +1,6 @@
 export const patientProfile = {
   firstName: 'Youssef',
-  fullName: 'Youssef El Idrissi',
+  fullName: 'Youssef Kacimi',
   id: 'PAT-00847',
   nextAppointment: {
     date: 'Vendredi 4 avril 2026',

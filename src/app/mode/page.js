@@ -36,7 +36,7 @@ export default function ModePage() {
 
     return (
         <div className="app-shell">
-            <Header showBackToSearch />
+            <Header showBack />
             <main className="app-main fade-in-up" style={{ maxWidth: 880, margin: '0 auto', padding: '40px 24px' }}>
                 <div style={{ textAlign: 'center', marginBottom: 32 }}>
                     <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>Selection du mode</h1>
@@ -53,10 +53,10 @@ export default function ModePage() {
                         width: 44, height: 44, borderRadius: 'var(--radius-md)', background: 'var(--primary-50)',
                         color: 'var(--primary-700)', display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontWeight: 700, fontSize: 15, flexShrink: 0
-                    }}>YA</div>
+                    }}>YK</div>
                     <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 600, fontSize: 15 }}>Youssef El Amrani</div>
-                        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>PAT-2024-00147 — 58 ans, Homme — Groupe sanguin A+</div>
+                        <div style={{ fontWeight: 600, fontSize: 15 }}>Youssef Kacimi</div>
+                        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>PAT-2024-00147 — 14 ans, Homme — Groupe sanguin A+</div>
                     </div>
                     <span className="badge badge-critical">3 alertes actives</span>
                     <button className="btn btn-ghost btn-sm" onClick={() => router.push('/search')}>

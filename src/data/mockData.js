@@ -6,17 +6,17 @@ export const MOCK_PATIENTS = [
     {
         id: "PAT-2024-00147",
         firstName: "Youssef",
-        lastName: "El Amrani",
-        initials: "YA",
-        age: 58,
-        dateOfBirth: "1968-03-15",
+        lastName: "Kacimi",
+        initials: "YK",
+        age: 14,
+        dateOfBirth: "2012-03-15",
         sex: "Homme",
         bloodType: "A+",
         height: "174 cm",
         weight: "89 kg",
         city: "Fes",
         phone: "+212 6 12 34 56 78",
-        emergencyContact: "Fatima El Amrani (epouse) — +212 6 23 45 67 89",
+        emergencyContact: "Fatima Kacimi (epouse) — +212 6 23 45 67 89",
         allergies: ["Penicilline", "Sulfamides"],
         conditions: [
             { name: "Diabete type 2", severity: "critical", since: "2016", details: "HbA1c : 7.8%" },
@@ -91,7 +91,7 @@ export const MOCK_PATIENTS = [
                 operations: [],
                 scans: [
                     { type: "Echographie abdominale", date: "2022-11-03", lab: "Centre Radio Fes Medina", doctor: "Dr. Tazi", result: "Steatose hepatique grade 1", image: "/scan-abdomen.png" },
-                    { type: "Bilan sanguin complet", date: "2026-01-08", lab: "Laboratoire Central Fes", doctor: "Dr. Karimi", result: "HbA1c 7.8%, Creatinine 12 mg/L, ASAT/ALAT normaux" }
+                    { type: "Bilan sanguin complet", date: "2026-01-08", lab: "Laboratoire Central Fes", doctor: "Dr. Karimi", result: "HbA1c 7.8%, Creatinine 12 mg/L, ASAT/ALAT normaux", image: "/scan-bilan.png" }
                 ],
                 medications: ["Metformine 1000mg", "Gliclazide 60mg"],
                 notes: "Patient jeune pendant le Ramadan. 2 episodes hypoglycemiques en 2025."
@@ -124,7 +124,7 @@ export const MOCK_PATIENTS = [
                 operations: [],
                 scans: [
                     { type: "IRM genou gauche", date: "2023-04-18", lab: "IRM Atlas, Fes", doctor: "Dr. Cherkaoui", result: "Gonarthrose grade 2, pincement femoro-tibial medial", image: "/scan-genou.png" },
-                    { type: "EMG membres inferieurs", date: "2025-02-10", lab: "CHU Hassan II, Fes", doctor: "Dr. Fassi Fihri", result: "Neuropathie sensitive debutante" }
+                    { type: "EMG membres inferieurs", date: "2025-02-10", lab: "CHU Hassan II, Fes", doctor: "Dr. Fassi Fihri", result: "Neuropathie sensitive debutante", image: "/scan-emg.png" }
                 ],
                 medications: ["Ibuprofene 400mg PRN"],
                 notes: "Neuropathie en lien avec le diabete. Suivi neurologique annuel recommande."
@@ -138,7 +138,7 @@ export const MOCK_PATIENTS = [
                     { name: "Ablation du materiel d'osteosynthese", date: "2007-03-14", hospital: "CHR Meknes", surgeon: "Dr. El Hajjami" }
                 ],
                 scans: [
-                    { type: "Radiographie tibia", date: "2007-06-01", lab: "CHR Meknes", doctor: "Dr. El Hajjami", result: "Consolidation complete, pas de sequelle" }
+                    { type: "Radiographie tibia", date: "2007-06-01", lab: "CHR Meknes", doctor: "Dr. El Hajjami", result: "Consolidation complete, pas de sequelle", image: "/scan-tibia.png" }
                 ],
                 medications: [],
                 notes: "Consolidation complete. Pas de sequelle fonctionnelle."
@@ -187,27 +187,27 @@ export const MOCK_PATIENTS = [
 // ═══ RECENT PATIENTS — Chacun avec un use case different ═══
 export const RECENT_PATIENTS = [
     {
-        id: "PAT-2024-00147", name: "Youssef El Amrani", initials: "YA",
-        age: 58, sex: "H", lastVisit: "15/01/2026", alerts: 3, alertLevel: "critical",
+        id: "PAT-2024-00147", name: "Youssef Kacimi", initials: "YK",
+        age: 14, sex: "H", lastVisit: "15/01/2026", alerts: 3, alertLevel: "critical",
         useCase: "Diabete + HTA + Cardio", specialty: "Cardiologie / Diabetologie"
     },
     {
-        id: "PAT-2024-00312", name: "Khadija Benkirane", initials: "KB",
+        id: "PAT-2024-00312", name: "Nada Elgourari", initials: "NE",
         age: 34, sex: "F", lastVisit: "12/01/2026", alerts: 0, alertLevel: "success",
         useCase: "Grossesse suivi prenatal", specialty: "Gynecologie / Obstetrique"
     },
     {
-        id: "PAT-2024-00089", name: "Mohammed Tazi", initials: "MT",
+        id: "PAT-2024-00089", name: "Lamiae Hadi", initials: "LH",
         age: 72, sex: "H", lastVisit: "08/01/2026", alerts: 1, alertLevel: "warning",
         useCase: "Post-AVC + Revalidation", specialty: "Neurologie / Reeducation"
     },
     {
-        id: "PAT-2023-00456", name: "Amina Fassi Fihri", initials: "AF",
+        id: "PAT-2023-00456", name: "Ahlam Tarik", initials: "AT",
         age: 45, sex: "F", lastVisit: "20/12/2025", alerts: 0, alertLevel: "success",
         useCase: "Suivi thyroide + Bilan annuel", specialty: "Endocrinologie"
     },
     {
-        id: "PAT-2024-00201", name: "Hassan El Mansouri", initials: "HM",
+        id: "PAT-2024-00201", name: "Chaimae Ouarab", initials: "CO",
         age: 63, sex: "H", lastVisit: "18/12/2025", alerts: 2, alertLevel: "warning",
         useCase: "Cancer colon — Chimio en cours", specialty: "Oncologie / Chirurgie digestive"
     }

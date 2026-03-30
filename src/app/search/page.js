@@ -8,7 +8,7 @@ export default function SearchPage() {
 
     return (
         <div className="app-shell">
-            <Header showBackToSearch />
+            <Header showBack />
             <main className="app-main fade-in-up" style={{ maxWidth: 720, margin: '0 auto', padding: '40px 24px' }}>
                 <div style={{ textAlign: 'center', marginBottom: 32 }}>
                     <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>Recherche Patient</h1>

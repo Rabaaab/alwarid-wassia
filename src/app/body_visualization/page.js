@@ -23,7 +23,7 @@ export default function BodyVisualizationPage() {
 
   return (
     <div className="app-shell">
-      <Header showMode modeName="consultation" patientName="Youssef El Amrani" patientId="PAT-2024-00147" />
+      <Header showMode modeName="consultation" patientName="Youssef Kacimi" patientId="PAT-2024-00147" showBack />
 
       <main className="app-main" style={{ background: 'linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%)' }}>
         <div style={{ maxWidth: 1400, margin: '0 auto', padding: 24 }}>

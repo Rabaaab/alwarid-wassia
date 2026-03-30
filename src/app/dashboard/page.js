@@ -26,7 +26,7 @@ function DashboardContent() {
 
     return (
         <div className="app-shell">
-            <Header showMode modeName={mode} patientName="Youssef El Amrani" patientId="PAT-2024-00147" />
+            <Header showMode modeName={mode} patientName="Youssef Kacimi" patientId="PAT-2024-00147" showBack />
             <main className="app-main">
                 {renderMode()}
             </main>

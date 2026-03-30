@@ -40,8 +40,7 @@ const TABS = [
     { id: 'imagerie', label: 'Imagerie et Documents', icon: ICON.docs },
     { id: '3d', label: 'Cartographie 3D', icon: ICON.body3d },
     { id: 'documents', label: 'Documents & IA', icon: ICON.ai },
-    { id: 'ordonnance', label: 'Ordonnance', icon: ICON.ordonnance },
-    { id: 'ai', label: 'Analyse IA', icon: ICON.ai }
+    { id: 'ordonnance', label: 'Ordonnance', icon: ICON.ordonnance }
 ];
 
 const AI_DOCUMENT_TYPES = [
@@ -89,7 +88,7 @@ function OverviewTab({ onGoTo3D }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div className="patient-info-card">
                     <div className="patient-info-header">
-                        <div className="patient-photo">YA</div>
+                        <div className="patient-photo">YK</div>
                         <div><div className="patient-name">{patient.firstName} {patient.lastName}</div><div className="patient-id">{patient.id}</div></div>
                     </div>
                     <div className="patient-info-grid">
@@ -1111,7 +1110,6 @@ export default function ConsultationMode() {
             {activeTab === 'imagerie' && <ImagerieTab />}
             {activeTab === 'documents' && <DocumentsAITab />}
             {activeTab === 'ordonnance' && <OrdonnanceTab />}
-            {activeTab === 'ai' && <AIAnalysisTab />}
             {activeTab === '3d' && (
                 <div style={{ padding: 24, maxWidth: 1400, margin: '0 auto', display: 'grid', gridTemplateColumns: '120px 1fr 320px', gap: 20 }}>
                     <div>
