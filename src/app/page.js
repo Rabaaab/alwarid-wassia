@@ -1,6 +1,5 @@
-'use client';
-import RoleSelector from '@/components/RoleSelector';
+import SignIn from '@/screens/SignIn';
 
 export default function HomePage() {
-  return <RoleSelector />;
+    return <SignIn />;
 }

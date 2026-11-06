@@ -1,0 +1,8 @@
+.root{position:relative}
+.root button{font-family:inherit;cursor:pointer}
+.root a{color:inherit}
+.root a:focus-visible,.root button:focus-visible{outline:3px solid #7ec7ec;outline-offset:2px}
+.card{background:#ffffff;border-radius:28px;padding:16px;box-shadow:0 22px 44px -30px rgba(28,95,178,0.45)}
+.sg button{flex:1;min-height:44px;border:none;border-radius:999px;font-size:14px;font-weight:700;transition:background 160ms ease,color 160ms ease}
+@keyframes rise{0%{opacity:0;transform:translateY(12px)}100%{opacity:1;transform:translateY(0)}}
+.rise{animation:rise 480ms cubic-bezier(.2,.8,.2,1) both}

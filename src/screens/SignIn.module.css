@@ -1,0 +1,23 @@
+.root{position:relative}
+.root input::placeholder{color:#94a3b8;font-weight:500}
+.root button{font-family:inherit;cursor:pointer}
+.root a:focus-visible,.root button:focus-visible,.root input:focus-visible{outline:3px solid #6fc6ec;outline-offset:2px}
+.field{width:100%;box-sizing:border-box;min-height:68px;border-radius:22px;border:1.5px solid #d3e5f2;background:#ffffff;padding:0 60px 0 58px;font-family:inherit;font-size:20px;font-weight:600;letter-spacing:0.02em;font-variant-numeric:tabular-nums;color:#0b2239;transition:border-color 180ms ease,box-shadow 180ms ease,background 180ms ease}
+.field:focus{outline:none;border-color:#0084c4;background:#ffffff;box-shadow:0 0 0 6px rgba(0,132,196,0.12)}
+.chip{min-height:44px;padding:0 18px;border-radius:999px;border:1px solid #cfe4f1;background:rgba(255,255,255,0.92);color:#334155;font-size:14px;font-weight:600}
+.chip:hover{border-color:#0084c4;color:#006ba3;background:#ffffff}
+.root a.cta{transition:transform 180ms ease,box-shadow 180ms ease}
+.root a.cta:hover{transform:translateY(-2px)}
+.tl{min-height:44px;display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:#475569;text-decoration:none;padding:0 16px;border-radius:999px;border:1px solid #d6e6f2;background:rgba(255,255,255,0.85)}
+.tl:hover{color:#006ba3;border-color:#0084c4;background:#ffffff}
+@keyframes drift{0%{transform:translateX(0)}100%{transform:translateX(-1440px)}}
+@keyframes sweep{0%{stroke-dashoffset:130}100%{stroke-dashoffset:-1000}}
+@keyframes shine{0%{transform:translateX(-70%)}100%{transform:translateX(260%)}}
+@keyframes rise{0%{opacity:0;transform:translateY(18px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes beat{0%,100%{transform:scale(1)}12%{transform:scale(1.18)}24%{transform:scale(1)}}
+.w1{animation:drift 26s linear infinite}
+.w2{animation:drift 38s linear infinite}
+.w3{animation:drift 52s linear infinite}
+.sw{stroke-dasharray:130 1000;animation:sweep 6.5s linear infinite}
+.rise{animation:rise 900ms cubic-bezier(.2,.8,.2,1) both}
+.heart{animation:beat 1.6s ease-in-out infinite;transform-origin:center}

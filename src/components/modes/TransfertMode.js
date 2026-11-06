@@ -2,6 +2,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import { useMemo, useState } from 'react';
 import { MOCK_PATIENTS } from '@/data/mockData';
+import { CAPABILITIES, computeTriage, rankFacilities, facilityLabel } from '@/data/facilitiesData';
 
 const patient = MOCK_PATIENTS[0];
 
@@ -38,6 +39,12 @@ export default function TransfertMode() {
     const [motif, setMotif] = useState('');
     const [urgency, setUrgency] = useState('normal');
     const [transferGenerated, setTransferGenerated] = useState(false);
+    const [needs, setNeeds] = useState(['cardio', 'scanner']);
+    const [publicOnly, setPublicOnly] = useState(true);
+    const triage = useMemo(() => computeTriage(patient), []);
+    const ranked = useMemo(() => rankFacilities(needs, urgency, publicOnly), [needs, urgency, publicOnly]);
+    const TRIAGE_LABEL = { normal: 'Normal', urgent: 'Urgent', critical: 'Critique' };
+    const TRIAGE_BADGE = { normal: 'badge-neutral', urgent: 'badge-warning', critical: 'badge-critical' };
     const transferExpiryDate = useMemo(() => {
         const expiry = new Date();
         expiry.setHours(expiry.getHours() + 72);
@@ -54,6 +61,78 @@ export default function TransfertMode() {
             case 1:
                 return (
                     <div className="fade-in">
+                        {/* Orientation intelligente : triage + etablissement le plus adapte */}
+                        <div className="card" style={{ marginBottom: 24, padding: 20, border: '1px solid var(--primary-200)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap', marginBottom: 12 }}>
+                                <div>
+                                    <h3 style={{ fontSize: 15, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>{ICN.building} Orientation intelligente</h3>
+                                    <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>
+                                        Au lieu de transferer vers le CHU par defaut, on oriente vers l'etablissement le plus proche qui dispose de l'equipement necessaire.
+                                    </p>
+                                </div>
+                                <div style={{ textAlign: 'right' }}>
+                                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>Triage suggere (regles)</div>
+                                    <span className={`badge ${TRIAGE_BADGE[triage.level]}`}>{TRIAGE_LABEL[triage.level]}</span>
+                                    {urgency !== triage.level && (
+                                        <button className="btn btn-ghost btn-sm" style={{ marginLeft: 8 }} onClick={() => setUrgency(triage.level)}>Appliquer</button>
+                                    )}
+                                </div>
+                            </div>
+                            <ul style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.7, paddingLeft: 18, marginBottom: 14 }}>
+                                {triage.factors.map((f, i) => <li key={i}>{f}</li>)}
+                            </ul>
+
+                            <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>Equipement / service requis</div>
+                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+                                {CAPABILITIES.map(c => (
+                                    <button key={c.id} className={`pill ${needs.includes(c.id) ? 'active' : ''}`}
+                                        onClick={() => setNeeds(prev => prev.includes(c.id) ? prev.filter(x => x !== c.id) : [...prev, c.id])}>
+                                        {c.label}
+                                    </button>
+                                ))}
+                                <label style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
+                                    <input type="checkbox" checked={publicOnly} onChange={() => setPublicOnly(v => !v)} style={{ accentColor: 'var(--primary-600)' }} />
+                                    Secteur public uniquement
+                                </label>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                {ranked.length === 0 && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Aucun etablissement dans ce perimetre.</div>}
+                                {ranked.map((f, i) => (
+                                    <div key={f.id} style={{
+                                        display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderRadius: 'var(--radius-md)',
+                                        border: `1px solid ${destination === f.id ? 'var(--primary-400)' : 'var(--border-default)'}`,
+                                        background: destination === f.id ? 'var(--primary-50)' : 'var(--bg-card)',
+                                        opacity: f.compatible ? 1 : 0.7
+                                    }}>
+                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                                                <span style={{ fontSize: 13, fontWeight: 600 }}>{f.name}</span>
+                                                <span className={`badge ${f.sector === 'public' ? 'badge-success' : 'badge-neutral'}`}>{f.sector === 'public' ? 'Public' : 'Prive'}</span>
+                                                {i === 0 && f.compatible && <span className="badge badge-info">Recommande</span>}
+                                            </div>
+                                            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                                                {f.distanceKm} km · ~{f.etaMin} min · lits critiques : {f.criticalBeds}
+                                            </div>
+                                            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 6 }}>
+                                                {needs.map(n => {
+                                                    const ok = f.capabilities.includes(n);
+                                                    return <span key={n} className={`badge ${ok ? 'badge-success' : 'badge-critical'}`} style={ok ? undefined : { textDecoration: 'line-through' }}>{CAPABILITIES.find(c => c.id === n)?.label}</span>;
+                                                })}
+                                                {f.noCriticalBed && <span className="badge badge-warning">Aucun lit critique disponible</span>}
+                                            </div>
+                                        </div>
+                                        <button className={`btn btn-sm ${destination === f.id ? 'btn-secondary' : 'btn-primary'}`} onClick={() => setDestination(f.id)}>
+                                            {destination === f.id ? 'Choisi' : 'Choisir'}
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                            <p style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 10 }}>
+                                Donnees de demonstration (simulees). En production : registre national des etablissements et disponibilite des lits en temps reel. Suggestion d'aide a la decision — le medecin decide.
+                            </p>
+                        </div>
+
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
                             <div>
                                 <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>{ICN.building} Etablissement destinataire</h3>
@@ -142,7 +221,7 @@ export default function TransfertMode() {
                             <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Resume du partage :</div>
                             <ul style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 2 }}>
                                 <li>Patient : {patient.firstName} {patient.lastName} ({patient.id})</li>
-                                <li>Destinataire : {destination || 'Non selectionne'}</li>
+                                <li>Destinataire : {destination ? facilityLabel(destination) : 'Non selectionne'}</li>
                                 <li>Donnees : {Object.entries(selectedData).filter(([, v]) => v).length} categories selectionnees</li>
                                 <li>Acces temporaire : 72 heures</li>
                                 <li>Motif : {motif || 'Non specifie'}</li>

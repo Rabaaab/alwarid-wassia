@@ -1,0 +1,11 @@
+.root{position:relative}
+.root button{font-family:inherit;cursor:pointer}
+.root a:focus-visible,.root button:focus-visible,.root input:focus-visible{outline:3px solid #7ec7ec;outline-offset:2px}
+.code{width:100%;box-sizing:border-box;min-height:68px;border-radius:20px;border:1.5px solid #cfe0f2;background:#f7fbff;text-align:center;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:30px;font-weight:500;letter-spacing:0.5em;padding-left:0.5em;color:#0f172a;transition:border-color 160ms ease,box-shadow 160ms ease}
+.code:focus{outline:none;border-color:#2a7de1;box-shadow:0 0 0 5px rgba(42,125,225,0.16);background:#ffffff}
+.root a.cta{transition:transform 160ms ease}
+.root a.cta:hover{transform:translateY(-2px)}
+@keyframes rise{0%{opacity:0;transform:translateY(16px) scale(0.985)}100%{opacity:1;transform:translateY(0) scale(1)}}
+.rise{animation:rise 520ms cubic-bezier(.2,.8,.2,1) both}
+@keyframes halo{0%{transform:scale(1);opacity:0.55}100%{transform:scale(1.28);opacity:0}}
+.halo{animation:halo 2.8s ease-out infinite}

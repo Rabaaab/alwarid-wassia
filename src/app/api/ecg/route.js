@@ -41,8 +41,8 @@ function offlineResult(signal) {
         unc = { predictive_entropy: 0.22, epistemic: 0.09, aleatoric: 0.13, should_refer: false };
     }
 
-    return { signal, prediction: pred, uncertainty: unc,
-        explainability: { gradcam_1d: cam, method: "Grad-CAM 1D (offline)" } };
+    return { signal, prediction: pred, uncertainty: unc, simulated: true,
+        explainability: { gradcam_1d: cam, method: "Grad-CAM 1D (simulation hors-ligne)" } };
 }
 
 export async function POST(request) {

@@ -1,6 +1,5 @@
-'use client';
-import RoleSelector from '@/components/RoleSelector';
+import { redirect } from 'next/navigation';
 
-export default function RolePage() {
-  return <RoleSelector />;
+export default function Page() {
+    redirect('/');
 }

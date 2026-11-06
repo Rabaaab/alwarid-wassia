@@ -362,6 +362,7 @@ function DocumentsAITab() {
     const [ecgXaiActive, setEcgXaiActive] = useState(false);
     const [addedToDossier, setAddedToDossier] = useState(false);
     const [isListening, setIsListening] = useState(false);
+    const [showMoreDocs, setShowMoreDocs] = useState(false);
     const recognitionRef = useRef(null);
     const ecgCanvasRef = useRef(null);
 
@@ -539,7 +540,7 @@ function DocumentsAITab() {
 
             {!selectedDoc ? (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
-                    {AI_DOCUMENT_TYPES.map(doc => (
+                    {(showMoreDocs ? AI_DOCUMENT_TYPES : AI_DOCUMENT_TYPES.slice(0, 3)).map(doc => (
                         <div key={doc.id} className="card card-interactive" onClick={() => {
                             setSelectedDoc(doc); setGeneratedReport(''); setDisplayedReport(''); setEcgFile(null); setEcgResult(null); setAddedToDossier(false); setAiInput('');
                             // Pre-load mock scanner images for demo
@@ -552,6 +553,11 @@ function DocumentsAITab() {
                             <span className={`badge ${doc.badge}`}>{doc.status}</span>
                         </div>
                     ))}
+                    <div style={{ gridColumn: '1 / -1', textAlign: 'center' }}>
+                        <button className="btn btn-ghost btn-sm" onClick={() => setShowMoreDocs(v => !v)}>
+                            {showMoreDocs ? 'Masquer les fiches secondaires' : `Autres fiches (${AI_DOCUMENT_TYPES.length - 3}) : surveillance, traitement, evaluation`}
+                        </button>
+                    </div>
                 </div>
             ) : (
                 <div className="fade-in">
@@ -659,6 +665,12 @@ function DocumentsAITab() {
                                                 )}
                                             </div>
 
+                                            {ecgResult.simulated && (
+                                                <div style={{ padding: '10px 16px', marginBottom: 16, background: 'var(--severity-info-bg)', border: '1px solid var(--severity-info-border)', borderRadius: 'var(--radius-md)', fontSize: 12, fontWeight: 600, color: 'var(--severity-info)' }}>
+                                                    Mode demonstration — le modele T-MECA n&apos;est pas connecte : ce resultat est simule a partir du signal, il ne provient pas du modele entraine.
+                                                </div>
+                                            )}
+
                                             {/* RESULTS GRID */}
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
                                                 {/* Prediction */}
@@ -687,7 +699,7 @@ function DocumentsAITab() {
 
                                                 {/* Uncertainty + Referral */}
                                                 <div className="card">
-                                                    <div className="card-header"><h4 style={{ fontSize: 14, fontWeight: 600 }}>Incertitude (MC-Dropout)</h4><span className="badge badge-info">{ecgResult.uncertainty.mc_passes} passes</span></div>
+                                                    <div className="card-header"><h4 style={{ fontSize: 14, fontWeight: 600 }}>Incertitude (MC-Dropout)</h4><span className="badge badge-info">{ecgResult.uncertainty.mc_passes ?? '—'} passes</span></div>
                                                     <div className="card-body">
                                                         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                                                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
@@ -720,7 +732,7 @@ function DocumentsAITab() {
                                                     {ecgXaiActive ? ' basee sur les zones en rouge/jaune du trace ci-dessus.' : ' activez l\'overlay XAI pour visualiser les zones diagnostiques.'}
                                                     {ecgResult.uncertainty.should_refer && ' L\'incertitude du modele est elevee — un avis specialise est recommande.'}
                                                     {' '}Entropie predictive: {ecgResult.uncertainty.predictive_entropy.toFixed(4)}.
-                                                    {' '}Analyse basee sur {ecgResult.uncertainty.mc_passes} passes MC-Dropout.
+                                                    {ecgResult.uncertainty.mc_passes ? ` Analyse basee sur ${ecgResult.uncertainty.mc_passes} passes MC-Dropout.` : ''}
                                                 </p>
                                             </div>
 
@@ -1111,11 +1123,7 @@ export default function ConsultationMode() {
             {activeTab === 'documents' && <DocumentsAITab />}
             {activeTab === 'ordonnance' && <OrdonnanceTab />}
             {activeTab === '3d' && (
-                <div style={{ padding: 24, maxWidth: 1400, margin: '0 auto', display: 'grid', gridTemplateColumns: '120px 1fr 320px', gap: 20 }}>
-                    <div>
-                        <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.5px', color: 'var(--text-muted)', marginBottom: 8 }}>Anatomie</div>
-                        {['Externe', 'Musculaire', 'Squelette', 'Organes'].map(l => (<button key={l} className={`btn btn-sm btn-secondary ${l === 'Externe' ? 'active' : ''}`} style={{ width: '100%', marginBottom: 6 }}>{l}</button>))}
-                    </div>
+                <div style={{ padding: 24, maxWidth: 1400, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 320px', gap: 20 }}>
                     <div style={{ background: 'linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-default)', height: 550, position: 'relative', overflow: 'hidden' }}>
                         <Suspense fallback={<div className="skeleton" style={{ width: '100%', height: '100%' }} />}><BodyViewer3D onRegionSelect={setSelectedRegion} regions={patient.bodyRegions} /></Suspense>
                     </div>

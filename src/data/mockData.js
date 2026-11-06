@@ -8,8 +8,8 @@ export const MOCK_PATIENTS = [
         firstName: "Youssef",
         lastName: "Kacimi",
         initials: "YK",
-        age: 14,
-        dateOfBirth: "2012-03-15",
+        age: 58,
+        dateOfBirth: "1968-03-15",
         sex: "Homme",
         bloodType: "A+",
         height: "174 cm",
@@ -188,7 +188,7 @@ export const MOCK_PATIENTS = [
 export const RECENT_PATIENTS = [
     {
         id: "PAT-2024-00147", name: "Youssef Kacimi", initials: "YK",
-        age: 14, sex: "H", lastVisit: "15/01/2026", alerts: 3, alertLevel: "critical",
+        age: 58, sex: "H", lastVisit: "15/01/2026", alerts: 3, alertLevel: "critical",
         useCase: "Diabete + HTA + Cardio", specialty: "Cardiologie / Diabetologie"
     },
     {

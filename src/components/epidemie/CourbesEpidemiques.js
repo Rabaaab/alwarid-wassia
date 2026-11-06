@@ -105,7 +105,7 @@ export default function CourbesEpidemiques() {
           <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
         </svg>
         <p style={{ fontSize: 11, color: '#64748b' }}>
-          Les points après "S0 (actuel)" sont des prévisions indicatives — ne pas extrapoler au-delà de 2 semaines
+          Les points après &quot;S0 (actuel)&quot; sont des prévisions indicatives — ne pas extrapoler au-delà de 2 semaines
         </p>
       </div>
     </div>

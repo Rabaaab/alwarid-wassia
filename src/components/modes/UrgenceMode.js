@@ -419,7 +419,7 @@ Genere par Alwarid — Outil d'aide a la decision`}</pre>
                         }}>YK</div>
                         <div>
                             <div style={{ fontSize: 20, fontWeight: 700 }}>Youssef Kacimi</div>
-                            <div style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: "'IBM Plex Mono', monospace" }}>PAT-2024-00147 — 14 ans, Homme</div>
+                            <div style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: "'IBM Plex Mono', monospace" }}>PAT-2024-00147 — 58 ans, Homme</div>
                         </div>
                     </div>
                     <div style={{ display: 'flex', gap: 12, flex: 1, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -522,12 +522,11 @@ Genere par Alwarid — Outil d'aide a la decision`}</pre>
                         <div style={{
                             background: 'linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%)',
                             borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-default)',
-                            height: 300, position: 'relative', overflow: 'hidden', animation: 'fadeInUp 0.4s ease both'
+                            height: 520, position: 'relative', overflow: 'hidden', animation: 'fadeInUp 0.4s ease both'
                         }}>
                             <Suspense fallback={<div className="skeleton" style={{ width: '100%', height: '100%' }} />}>
                                 <BodyViewer3D onRegionSelect={setSelectedRegion} regions={patient.bodyRegions} />
                             </Suspense>
-                            <div style={{ position: 'absolute', top: 12, left: 12, padding: '6px 12px', background: 'rgba(30,41,59,0.85)', color: 'white', borderRadius: 'var(--radius-md)', fontSize: 11, fontWeight: 600, letterSpacing: '.5px', textTransform: 'uppercase', backdropFilter: 'blur(6px)' }}>Mode urgence — Cliquez sur une zone</div>
                         </div>
 
                         {/* Region Detail */}

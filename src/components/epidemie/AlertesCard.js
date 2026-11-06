@@ -24,7 +24,7 @@ export default function AlertesCard({ alertes: initialAlertes }) {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <div>
           <h2 style={{ fontSize: 15, fontWeight: 700, color: '#0f172a', marginBottom: 2 }}>Alertes actives</h2>
-          <p style={{ fontSize: 12, color: '#64748b' }}>L'IA propose — le médecin valide</p>
+          <p style={{ fontSize: 12, color: '#64748b' }}>L&apos;IA propose — le médecin valide</p>
         </div>
         {actives.length > 0 && (
           <span style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', borderRadius: 999, padding: '3px 10px', fontSize: 12, fontWeight: 700 }}>

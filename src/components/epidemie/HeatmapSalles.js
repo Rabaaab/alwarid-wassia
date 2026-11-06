@@ -24,7 +24,7 @@ export default function HeatmapSalles() {
     <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16, padding: 24, boxShadow: '0 2px 8px rgba(30,41,59,0.05)' }}>
       <div style={{ marginBottom: 16 }}>
         <h2 style={{ fontSize: 15, fontWeight: 700, color: '#0f172a', marginBottom: 2 }}>Heatmap salles × jours</h2>
-        <p style={{ fontSize: 12, color: '#64748b' }}>Score d'anomalie IF — 7 derniers jours · Survolez une cellule pour le détail</p>
+        <p style={{ fontSize: 12, color: '#64748b' }}>Score d&apos;anomalie IF — 7 derniers jours · Survolez une cellule pour le détail</p>
       </div>
 
       <div style={{ overflowX: 'auto' }}>

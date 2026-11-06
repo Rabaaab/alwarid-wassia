@@ -132,7 +132,7 @@ export default function PrevisionsChart() {
           <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
         </svg>
         <p style={{ fontSize: 11, color: '#92400e', fontWeight: 500 }}>
-          Prévision indicative — ne pas extrapoler au-delà de 2 semaines. L'IA propose, le médecin décide.
+          Prévision indicative — ne pas extrapoler au-delà de 2 semaines. L&apos;IA propose, le médecin décide.
         </p>
       </div>
     </div>

@@ -1,45 +1,18 @@
 'use client';
-import { Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import dynamic from 'next/dynamic';
-import Header from '@/components/Header';
-import PopupAIChat from '@/components/PopupAIChat';
+import { Suspense, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-const UrgenceMode = dynamic(() => import('@/components/modes/UrgenceMode'), { ssr: false, loading: () => <div style={{ padding: 40, textAlign: 'center' }}>Chargement...</div> });
-const ConsultationMode = dynamic(() => import('@/components/modes/ConsultationMode'), { ssr: false, loading: () => <div style={{ padding: 40, textAlign: 'center' }}>Chargement...</div> });
-const SuiviMode = dynamic(() => import('@/components/modes/SuiviMode'), { ssr: false, loading: () => <div style={{ padding: 40, textAlign: 'center' }}>Chargement...</div> });
-const TransfertMode = dynamic(() => import('@/components/modes/TransfertMode'), { ssr: false, loading: () => <div style={{ padding: 40, textAlign: 'center' }}>Chargement...</div> });
-
-function DashboardContent() {
-    const searchParams = useSearchParams();
-    const mode = searchParams.get('mode') || 'consultation';
-
-    const renderMode = () => {
-        switch (mode) {
-            case 'urgence': return <UrgenceMode />;
-            case 'consultation': return <ConsultationMode />;
-            case 'suivi': return <SuiviMode />;
-            case 'transfert': return <TransfertMode />;
-            default: return <ConsultationMode />;
-        }
-    };
-
-    return (
-        <div className="app-shell">
-            <Header showMode modeName={mode} patientName="Youssef Kacimi" patientId="PAT-2024-00147" showBack />
-            <main className="app-main">
-                {renderMode()}
-            </main>
-            <PopupAIChat mode={mode} />
-            <footer className="page-footer">© 2026 Alwarid. All rights reserved.</footer>
-        </div>
-    );
+function Redirect() {
+    const router = useRouter();
+    const mode = useSearchParams().get('mode') || 'consultation';
+    useEffect(() => { router.replace(`/doctor/mode/${mode}`); }, [router, mode]);
+    return null;
 }
 
 export default function DashboardPage() {
     return (
-        <Suspense fallback={<div style={{ padding: 40, textAlign: 'center' }}>Chargement...</div>}>
-                <DashboardContent />
+        <Suspense fallback={null}>
+            <Redirect />
         </Suspense>
     );
 }

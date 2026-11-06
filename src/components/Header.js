@@ -59,6 +59,7 @@ export default function Header({ showMode, modeName, mode, patientName, patientI
 
         if (ROOT_ROUTES.has(pathname)) {
             writeInternalHistory([]);
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setPreviousRoute(null);
             return;
         }
@@ -69,6 +70,7 @@ export default function Header({ showMode, modeName, mode, patientName, patientI
             : [...history, currentRoute];
 
         writeInternalHistory(nextHistory);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setPreviousRoute(getPreviousRoute(nextHistory, currentRoute));
     }, [currentRoute, pathname]);
 

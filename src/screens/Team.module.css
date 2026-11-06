@@ -1,0 +1,23 @@
+.root{position:relative}
+.root button{font-family:inherit;cursor:pointer}
+.root a{color:inherit}
+.root a:focus-visible,.root button:focus-visible,.root input:focus-visible{outline:3px solid #7ec7ec;outline-offset:2px}
+.glass{background:rgba(255,255,255,0.82);border:1px solid rgba(255,255,255,0.95);box-shadow:0 1px 0 rgba(255,255,255,0.9) inset,0 24px 56px -30px rgba(28,95,178,0.4);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.nv{min-height:48px;padding:0 18px;border-radius:999px;display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:15px;color:#334155;text-decoration:none}
+.nv:hover{background:rgba(41,162,221,0.1)}
+.nv.on{background:#e6f1fb;color:#1c5fb2}
+.bd{min-width:20px;height:20px;line-height:20px;border-radius:10px;background:#dc2626;color:#ffffff;font-size:12px;font-weight:700;text-align:center}
+.ib{width:48px;height:48px;border-radius:50%;border:1px solid #d4e6f7;background:#ffffff;display:flex;align-items:center;justify-content:center;position:relative}
+.tabs a{min-height:48px;padding:0 22px;border-radius:999px;display:inline-flex;align-items:center;font-size:15px;font-weight:600;color:#334155;text-decoration:none}
+.tabs a:hover{background:rgba(41,162,221,0.12)}
+.tabs a.on{background:linear-gradient(135deg,#2a7de1,#1c5fb2);color:#ffffff;box-shadow:0 12px 24px -10px rgba(28,95,178,0.65)}
+.panel{background:#ffffff;border-radius:32px;padding:24px;box-shadow:0 26px 50px -32px rgba(28,95,178,0.4)}
+.tag{font-size:12px;font-weight:700;border-radius:999px;padding:5px 11px;white-space:nowrap}
+.dcard{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:18px;border-radius:28px;border:1px solid #e2eef9;background:#ffffff;transition:transform 180ms ease,box-shadow 180ms ease}
+.dcard:hover{transform:translateY(-3px);box-shadow:0 26px 46px -28px rgba(28,95,178,0.5)}
+.msg{width:48px;height:48px;border-radius:50%;border:1px solid #bfdbfe;background:#ffffff;display:flex;align-items:center;justify-content:center;flex:none}
+.msg:hover{background:#f1f7fd}
+@keyframes rise{0%{opacity:0;transform:translateY(14px)}100%{opacity:1;transform:translateY(0)}}
+.rise{animation:rise 520ms cubic-bezier(.2,.8,.2,1) both}
+@media (max-width:1000px){.cols{flex-direction:column !important}
+}

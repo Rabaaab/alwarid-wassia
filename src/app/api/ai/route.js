@@ -6,10 +6,16 @@
 export async function POST(request) {
     const { systemPrompt, userMessage, patientContext } = await request.json();
 
-    const apiKey = process.env.MISTRAL_API_KEY;
-    if (!apiKey || apiKey === 'YOUR_KEY_HERE') {
+    // Provider is configurable: any OpenAI-compatible endpoint works, which lets
+    // the doctor side run fully local (e.g. Ollama: LLM_BASE_URL=http://localhost:11434/v1).
+    // Without LLM_BASE_URL we fall back to the Mistral cloud API.
+    const baseUrl = (process.env.LLM_BASE_URL || 'https://api.mistral.ai/v1').replace(/\/$/, '');
+    const isLocal = Boolean(process.env.LLM_BASE_URL);
+    const model = process.env.LLM_MODEL || process.env.MISTRAL_MODEL || 'mistral-small-latest';
+    const apiKey = process.env.LLM_API_KEY || process.env.MISTRAL_API_KEY;
+    if (!isLocal && (!apiKey || apiKey === 'YOUR_KEY_HERE')) {
         return Response.json(
-            { error: 'Cle API Mistral non configuree. Ajoutez MISTRAL_API_KEY dans .env.local' },
+            { error: 'Aucun LLM configure. Ajoutez MISTRAL_API_KEY ou LLM_BASE_URL (LLM local) dans .env.local' },
             { status: 500 }
         );
     }
@@ -27,14 +33,14 @@ export async function POST(request) {
     ];
 
     try {
-        const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
+        const response = await fetch(`${baseUrl}/chat/completions`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apiKey}`
+                ...(apiKey ? { 'Authorization': `Bearer ${apiKey}` } : {})
             },
             body: JSON.stringify({
-                model: 'mistral-small-latest',
+                model,
                 messages,
                 stream: true,
                 max_tokens: 2000,
@@ -45,7 +51,7 @@ export async function POST(request) {
         if (!response.ok) {
             const errText = await response.text();
             return Response.json(
-                { error: `Erreur Mistral API (${response.status}): ${errText}` },
+                { error: `Erreur API LLM (${response.status}): ${errText}` },
                 { status: response.status }
             );
         }
