@@ -1,0 +1,117 @@
+<!doctype html><html><head><meta charset="utf-8"><title>AlWarid Consultation</title>
+<link rel="stylesheet" href="common.css"><script src="common.js"></script>
+<style>
+html, body { width: 1600px; height: 900px; }
+body { background: linear-gradient(180deg, #DCEBFB 0%, #EEF5FD 50%, #F7FAFE 100%); font-size: 14px; }
+a { text-decoration: none; color: inherit; }
+.nav { left: 20px; right: 20px; top: 14px; height: 58px; padding: 0 22px; }
+.nav img.logo { height: 30px; margin-right: 18px; }
+.nav .tab { font-size: 14.5px; padding: 8px 16px; cursor: pointer; }
+.nav .tab.on { background: linear-gradient(135deg, #2A7DE1, #1C5FB2); color: #fff; }
+.nav .doc b { font-size: 13.5px; } .nav .doc span { font-size: 12px; } .nav .doc img { width: 36px; height: 36px; }
+.wcard { position: absolute; background: #fff; border: 1px solid var(--line); border-radius: 22px; box-shadow: 0 8px 24px rgba(28,95,178,.07); }
+.ln { padding: 12px 14px; border-radius: 14px; margin-bottom: 10px; font-size: 14px; line-height: 1.45; }
+.ln b { display: block; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 2px; }
+.ln.dr { background: #E3EFFC; color: #0E3A7D; } .ln.fm { background: #F4F8FD; color: var(--muted); }
+.med { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #EEF3FA; font-size: 14px; }
+.med:last-child { border-bottom: 0; } .med b { font-weight: 700; } .med span { color: var(--soft); font-size: 12.5px; }
+#msgs { position: absolute; left: 26px; right: 26px; top: 70px; bottom: 146px; overflow-y: auto; padding-right: 6px; }
+.q { display: flex; justify-content: flex-end; margin: 0 0 10px; }
+.q div { background: linear-gradient(135deg, #2A7DE1, #1C5FB2); color: #fff; border-radius: 18px 18px 4px 18px; padding: 12px 18px; font-weight: 600; font-size: 15.5px; max-width: 70%; }
+.a { margin: 0 0 20px; max-width: 92%; }
+.a .who { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 800; letter-spacing: .08em; color: #5B3FD9; margin-bottom: 8px; }
+.a .who i { width: 26px; height: 26px; border-radius: 9px; background: #EDE9FF; display: flex; align-items: center; justify-content: center; font-style: normal; }
+.a .txt { background: #F7F9FD; border: 1px solid var(--line); border-radius: 4px 18px 18px 18px; padding: 12px 16px; font-size: 15px; line-height: 1.5; color: var(--ink); }
+.ix { position: relative; background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 9px 18px 9px 24px; margin-bottom: 8px; }
+.ix:before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 7px; border-radius: 16px 0 0 16px; background: var(--c); }
+.ix small { font-size: 10.5px; font-weight: 800; letter-spacing: .1em; color: var(--soft); } .ix b { display: block; font-size: 16px; font-weight: 800; margin-top: 2px; } .ix p { font-size: 14px; color: var(--muted); margin-top: 2px; }
+.note { font-size: 12.5px; color: #7A4B07; background: #FFF8EA; border: 1px solid #F5D9A0; border-radius: 12px; padding: 8px 12px; margin-top: 6px; display: inline-block; }
+.chips { position: absolute; left: 26px; right: 26px; bottom: 86px; display: flex; gap: 10px; flex-wrap: wrap; }
+.chips span { background: #E3EFFC; color: #1C5FB2; font-weight: 700; font-size: 13.5px; padding: 8px 16px; border-radius: 99px; cursor: pointer; }
+.chips span:hover { background: #D2E4FA; }
+.inp { position: absolute; left: 26px; right: 26px; bottom: 22px; height: 54px; border: 1px solid var(--line); border-radius: 99px; background: #fff; display: flex; align-items: center; padding: 0 8px 0 22px; }
+.inp input { flex: 1; border: 0; outline: 0; font: inherit; font-size: 15px; color: var(--ink); background: transparent; }
+.inp button { width: 40px; height: 40px; border-radius: 50%; border: 0; background: linear-gradient(135deg, #2A7DE1, #1C5FB2); color: #fff; font-size: 18px; cursor: pointer; }
+.typing { display: inline-flex; gap: 5px; } .typing i { width: 8px; height: 8px; border-radius: 50%; background: #94A3B8; animation: b 1s infinite; } .typing i:nth-child(2) { animation-delay: .15s; } .typing i:nth-child(3) { animation-delay: .3s; }
+@keyframes b { 0%, 100% { opacity: .3; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }
+</style></head><body>
+<div class="nav"><img class="logo" src="logo.png"><a class="tab" href="index.html">Patient 360</a><a class="tab on" href="consultation.html">Consultation</a><span class="tab">Epidemics</span><span class="tab">WassIA</span><span class="tab">Memory report</span>
+ <div class="doc"><div><b>Dr. Example</b><span>Emergency medicine</span></div><img src="doctor.jpg"></div></div>
+
+<div class="wcard" style="left:20px;top:86px;width:484px;height:82px;display:flex;align-items:center;gap:14px;padding:0 18px">
+  <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#4AB7EA,#1C5FB2);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:16px;flex:none">AM</div>
+  <div><div style="font-size:20px;font-weight:800">Amina <span style="font-weight:500;color:var(--muted)">· 72 · consultation</span></div><div style="font-size:12.5px;color:var(--soft);margin-top:2px">Atrial fibrillation · Hypertension · Type 2 diabetes · Left knee osteoarthritis</div></div></div>
+<div class="wcard" style="left:516px;top:86px;width:880px;height:82px;overflow:hidden">
+  <div style="width:100%;height:100%;background:#FFF5F5;display:flex;align-items:center;gap:16px;padding:0 22px 0 30px;border-left:7px solid #DC2626">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></svg>
+    <div><div class="lab" style="color:var(--red);font-size:11px">Severe antibiotic allergy</div><div style="font-size:21px;font-weight:800;margin-top:2px">Penicillin family (amoxicillin): anaphylaxis</div></div></div></div>
+<a class="abs btn ghost" href="index.html" style="left:1408px;top:104px;width:172px;padding:12px 0;font-size:14.5px;white-space:nowrap">← Patient 360</a>
+
+<!-- left: live conversation + file -->
+<div class="wcard" style="left:20px;top:182px;width:440px;height:366px;padding:22px">
+  <div style="display:flex;align-items:center"><div class="lab">Live conversation</div><span class="pill green" style="margin-left:auto">● Listening, with consent</span></div>
+  <div id="wv" style="display:flex;align-items:center;gap:3px;height:40px;margin:16px 0 14px"></div>
+  <div class="ln dr"><b>Doctor</b>Does she take anything for the pain in her knee?</div>
+  <div class="ln fm"><b>Family</b>Ibuprofen when it hurts, and her pills for pressure and sugar.</div>
+</div>
+<div class="wcard" style="left:20px;top:562px;width:440px;height:320px;padding:22px">
+  <div class="lab">Current medications · from her file</div>
+  <div style="margin-top:10px">
+    <div class="med"><b>Metformin 1000 mg</b><span>twice a day</span></div>
+    <div class="med"><b>Gliclazide 60 mg</b><span>morning</span></div>
+    <div class="med"><b>Amlodipine 10 mg</b><span>once a day</span></div>
+    <div class="med"><b>Bisoprolol 5 mg</b><span>morning</span></div>
+    <div class="med"><b>Atorvastatin 20 mg</b><span>evening</span></div>
+    <div class="med"><b>Ibuprofen 400 mg</b><span>as needed</span></div>
+  </div>
+</div>
+
+<!-- chat -->
+<div class="wcard" style="left:474px;top:182px;width:1106px;height:700px;overflow:hidden">
+  <div class="abs" style="left:26px;top:22px;right:26px;display:flex;align-items:center;gap:12px">
+    <span class="pill" style="background:#EDE9FF;color:#5B3FD9;font-size:13px;padding:6px 14px">AI assistant</span>
+    <div style="font-size:20px;font-weight:800">Ask anything about Amina's file</div>
+    <span style="margin-left:auto;color:var(--soft);font-size:13px">Answers only from her own records</span></div>
+  <div id="msgs"></div>
+  <div class="chips">
+    <span data-q="Could this interact with anything Amina takes?">Drug interactions</span>
+    <span data-q="Which allergies should I know about?">Allergies</span>
+    <span data-q="Give me a short summary of her file.">Summary</span>
+    <span data-q="Which exams are due?">Exams due</span>
+  </div>
+  <div class="inp"><input id="in" placeholder="Ask a question about Amina's file..."><button id="send">➤</button></div>
+</div>
+<div class="foot" style="bottom:2px;font-size:11.5px">Decision support. The final decision belongs to the treating doctor. Demonstration data, fictional patient.</div>
+
+<script>
+let h = ''; const r = rng(4); for (let i = 0; i < 80; i++) { const a = 6 + Math.abs(Math.sin(i * .5) * 26) * (0.5 + r() * .7); h += `<i style="display:block;width:3.5px;height:${a}px;border-radius:3px;background:${i < 58 ? '#2A7DE1' : '#BFD3EE'}"></i>`; }
+document.getElementById('wv').innerHTML = h;
+const IX = (c, src, t, d) => `<div class="ix" style="--c:${c}"><small>${src}</small><b>${t}</b><p>${d}</p></div>`;
+const NOTE = '<div class="note">Decision support. The doctor decides.</div>';
+function answer(q) {
+  const s = q.toLowerCase();
+  if (/interact|drug|medic|takes|ibuprofen/.test(s)) return 'Three interactions found in her current treatment:' + '<div style="margin-top:12px">' +
+    IX('#DC2626', 'CRITICAL · VIDAL DATABASE', 'Amlodipine + Bisoprolol', 'Risk of severe bradycardia. Monitor the heart rate.') +
+    IX('#DC2626', 'CRITICAL · DRUGBANK', 'Gliclazide + Ramadan fasting', 'High risk of hypoglycemia. Adjust the dosing times.') +
+    IX('#D97706', 'WARNING · VIDAL DATABASE', 'Ibuprofen + Amlodipine', 'Reduces the blood pressure effect. Prefer paracetamol for the knee pain.') + '</div>' + NOTE;
+  if (/allerg/.test(s)) return '<b>Penicillin family (amoxicillin): anaphylaxis.</b> Found in a discharge report from 12 March 2014, page 37 of 52. Also allergic to <b>sulfonamides</b>. Avoid both families.<br>' + NOTE;
+  if (/summar|file|overview/.test(s)) return 'Amina, 72. <b>Type 2 diabetes</b> since 2016 (HbA1c 7.8%), <b>stage 2 hypertension</b> (155/95), <b>high cholesterol</b>, <b>left knee osteoarthritis</b> grade 2. Atrial fibrillation on today\'s ECG. Severe penicillin allergy.<br>' + NOTE;
+  if (/exam|test|due|lab/.test(s)) return 'Suggested for the doctor to review: <b>control ECG</b>, <b>HbA1c</b> (last 7.8%, target below 7%), <b>lipid panel</b>, and a <b>knee X-ray</b> follow-up.<br>' + NOTE;
+  return 'I only answer from Amina\'s file. You can ask about her medications, allergies, exams or a summary.';
+}
+const box = document.getElementById('msgs');
+function ask(q, instant) {
+  if (!q.trim()) return;
+  box.insertAdjacentHTML('beforeend', `<div class="q"><div>${q}</div></div>`);
+  const id = 'a' + Date.now() + Math.floor(Math.random() * 1000);
+  box.insertAdjacentHTML('beforeend', `<div class="a"><div class="who"><i>✦</i>ALWARID ASSISTANT</div><div class="txt" id="${id}">${instant ? answer(q) : '<span class="typing"><i></i><i></i><i></i></span>'}</div></div>`);
+  if (!instant) box.scrollTop = box.scrollHeight;
+  if (!instant) setTimeout(() => { document.getElementById(id).innerHTML = answer(q); box.scrollTop = box.scrollHeight; }, 900);
+}
+document.querySelectorAll('[data-q]').forEach((el) => el.onclick = () => ask(el.dataset.q));
+const inp = document.getElementById('in');
+document.getElementById('send').onclick = () => { ask(inp.value); inp.value = ''; };
+inp.onkeydown = (e) => { if (e.key === 'Enter') { ask(inp.value); inp.value = ''; } };
+if (!new URLSearchParams(location.search).get('empty')) ask('Could this interact with anything Amina takes?', true);
+else box.innerHTML = '<div style="color:var(--soft);font-size:15px;margin-top:8px">The assistant is ready. Ask a question or tap a suggestion.</div>';
+</script></body></html>

@@ -1,0 +1,169 @@
+<!doctype html><html><head><meta charset="utf-8"><title>AlWarid Patient 360</title>
+<link rel="stylesheet" href="common.css"><script src="common.js"></script>
+<style>
+html, body { width: 1600px; height: 900px; }
+a { text-decoration: none; color: inherit; }
+body { background: linear-gradient(180deg, #DCEBFB 0%, #EEF5FD 50%, #F7FAFE 100%); font-size: 14px; }
+.nav { left: 20px; right: 20px; top: 14px; height: 58px; padding: 0 22px; }
+.nav img.logo { height: 30px; margin-right: 18px; }
+.nav .tab { font-size: 14.5px; padding: 8px 16px; cursor: pointer; }
+.nav .tab.on { background: linear-gradient(135deg, #2A7DE1, #1C5FB2); color: #fff; }
+.nav .doc b { font-size: 13.5px; } .nav .doc span { font-size: 12px; } .nav .doc img { width: 36px; height: 36px; }
+.wcard { position: absolute; background: #fff; border: 1px solid var(--line); border-radius: 22px; box-shadow: 0 8px 24px rgba(28,95,178,.07); }
+.mon { position: absolute; left: 20px; top: 178px; width: 535px; height: 402px; border-radius: 22px; background: #0B1424; border: 1px solid #1C2F50; box-shadow: 0 16px 34px rgba(8,25,60,.25); color: #D7E4F7; overflow: hidden; }
+.mon .hd { display: flex; align-items: center; gap: 10px; padding: 14px 18px 8px; font-size: 12.5px; font-weight: 700; color: #C9D7EC; letter-spacing: .04em; }
+.mon .box { position: absolute; left: 14px; width: 352px; border-radius: 14px; border: 1px solid #1B2C4A; overflow: hidden; background-color: #0E1A2E; }
+.mon .lb { position: absolute; left: 12px; top: 8px; font-size: 12px; font-weight: 800; letter-spacing: .06em; z-index: 2; }
+.mon .rd { position: absolute; left: 384px; }
+.mon .rd .k { font-size: 12.5px; font-weight: 800; } .mon .rd .k span { font-weight: 600; color: #8DA7CC; }
+.mon .rd .v { font-weight: 800; line-height: 1; margin-top: 4px; } .mon .rd .s { font-size: 12.5px; color: #B9C9E2; margin-top: 4px; }
+.gridd { background-image: linear-gradient(#17294A 1px, transparent 1px), linear-gradient(90deg, #17294A 1px, transparent 1px); background-size: 18px 18px; }
+.tile { position: absolute; top: 706px; height: 80px; width: 127px; border-radius: 18px; background: #fff; border: 1px solid var(--line); padding: 12px 14px; }
+.tile small { display: block; font-size: 10.5px; font-weight: 800; letter-spacing: .1em; color: var(--soft); }
+.tile b { font-size: 26px; font-weight: 800; } .tile i { font-style: normal; font-size: 12px; color: var(--soft); margin-left: 3px; } .tile em { display: block; font-style: normal; font-size: 12px; font-weight: 700; margin-top: 1px; }
+.stage { position: absolute; left: 568px; top: 178px; width: 1012px; height: 704px; border-radius: 26px; background: rgba(255,255,255,.62); border: 1px solid rgba(255,255,255,.95); box-shadow: 0 10px 30px rgba(28,95,178,.08); overflow: hidden; }
+.layers { position: absolute; left: 20px; top: 18px; display: flex; gap: 4px; background: #fff; border-radius: 99px; padding: 5px; border: 1px solid var(--line); }
+.layers span { padding: 8px 16px; border-radius: 99px; font-weight: 700; font-size: 13px; color: var(--muted); } .layers span.on { background: var(--blue2); color: #fff; }
+.pin2 { position: absolute; width: 22px; height: 22px; border-radius: 50%; border: 3.5px solid #fff; box-shadow: 0 3px 10px rgba(15,23,42,.35); transform: translate(-50%,-50%); cursor: pointer; z-index: 3; }
+.plab { position: absolute; transform: translate(0,-50%); background: #fff; border-radius: 99px; padding: 6px 14px; font-weight: 700; font-size: 13.5px; box-shadow: 0 4px 14px rgba(15,23,42,.14); cursor: pointer; z-index: 3; white-space: nowrap; }
+.halo { position: absolute; width: 58px; height: 58px; border-radius: 50%; transform: translate(-50%,-50%); z-index: 2; }
+.zc { position: absolute; left: 582px; width: 410px; background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 16px 18px; box-shadow: 0 10px 26px rgba(28,95,178,.10); }
+.zc .t { display: flex; align-items: center; gap: 9px; font-size: 18px; font-weight: 800; }
+.zc .t .chip { margin-left: auto; font-size: 12.5px; font-weight: 700; padding: 5px 12px; border-radius: 99px; }
+.zc .media { margin-top: 12px; border-radius: 14px; overflow: hidden; position: relative; background: #000; }
+.zc .cap { margin-top: 10px; font-size: 13px; color: var(--muted); line-height: 1.4; }
+.zc .open { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; padding: 8px 18px; border-radius: 99px; border: 1px solid var(--line); color: var(--blue); font-weight: 700; font-size: 13.5px; }
+.zc .score { display: flex; align-items: baseline; justify-content: space-between; margin-top: 12px; } .zc .score b { font-size: 15px; } .zc .score span { font-size: 26px; font-weight: 800; color: var(--red); }
+.hm { position: absolute; border-radius: 50%; filter: blur(12px); }
+.hint { position: absolute; background: #fff; border-radius: 99px; padding: 10px 18px; font-weight: 700; font-size: 14px; box-shadow: 0 4px 14px rgba(15,23,42,.10); border: 1px solid var(--line); }
+.chip.red { background: #FDE2E2; color: #C21F1F; } .chip.amber { background: #FEF0D6; color: #A15C07; } .chip.blue { background: #E3EFFC; color: #1C5FB2; } .chip.green { background: #DDF6E8; color: #0F7A3C; } .chip.violet { background: #EDE9FF; color: #5B3FD9; }
+svg.ic { width: 20px; height: 20px; flex: none; }
+</style></head><body>
+<div class="nav"><img class="logo" src="logo.png"><a class="tab on" href="index.html">Patient 360</a><a class="tab" href="consultation.html">Consultation</a><span class="tab">Epidemics</span><span class="tab">WassIA</span><span class="tab">Memory report</span>
+ <div class="doc"><div><b>Dr. Example</b><span>Emergency medicine</span></div><img src="doctor.jpg"></div></div>
+
+<div class="wcard" style="left:20px;top:86px;width:484px;height:82px;display:flex;align-items:center;gap:14px;padding:0 18px">
+  <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#4AB7EA,#1C5FB2);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:16px;flex:none">AM</div>
+  <div><div style="font-size:20px;font-weight:800">Amina <span style="font-weight:500;color:var(--muted)">· 72 · arrived unconscious</span></div><div style="font-size:12.5px;color:var(--soft);margin-top:2px">Emergency admission 10:14 · Atrial fibrillation · Hypertension · Type 2 diabetes</div></div></div>
+<div id="allergy" class="wcard" style="left:516px;top:86px;width:880px;height:82px;overflow:hidden">
+  <div class="real" style="width:100%;height:100%;background:#FFF5F5;display:flex;align-items:center;gap:16px;padding:0 22px 0 30px;border-left:7px solid #DC2626">
+    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></svg>
+    <div><div class="lab" style="color:var(--red);font-size:11px">Severe antibiotic allergy · read this first</div><div style="font-size:22px;font-weight:800;margin-top:2px">Penicillin family (amoxicillin): anaphylaxis</div><div style="font-size:12.5px;color:var(--muted);margin-top:1px">Found in an old report: discharge report, 12 March 2014, page 37 of 52</div></div></div>
+  <div class="pending" style="width:100%;height:100%;display:flex;align-items:center;gap:16px;padding:0 30px"><div class="lab">Critical alerts</div><div style="color:var(--soft);font-weight:600;font-size:15px">Reading 12 years of records...</div></div>
+</div>
+<a class="abs btn" href="consultation.html" style="left:1408px;top:104px;width:172px;padding:12px 0;font-size:14.5px;white-space:nowrap">Consultation →</a>
+
+<!-- live monitor -->
+<div class="mon">
+  <div class="hd"><span style="width:9px;height:9px;border-radius:50%;background:#FF5A5A;box-shadow:0 0 8px #FF5A5A"></span>EMERGENCY · BAY 4<span style="margin-left:auto;color:#8DA7CC;font-weight:600">25 mm/s · 10:22:37</span></div>
+  <div class="box gridd" style="top:44px;height:150px"><div class="lb" style="color:#E6EEFA">ECG II</div><svg id="e1" width="352" height="150" style="position:absolute;left:0;top:0;filter:drop-shadow(0 0 4px #3BE58E)"></svg></div>
+  <div class="rd" style="top:48px"><div class="k" style="color:#3BE58E">HR <span>bpm</span></div><div class="v" style="font-size:64px;color:#3BE58E">104</div><div class="s">Irregular rhythm</div></div>
+  <div class="box gridd" style="top:204px;height:92px"><div class="lb" style="color:#E6EEFA">PLETH</div><svg id="e2" width="352" height="92" style="position:absolute;left:0;top:0"></svg></div>
+  <div class="rd" style="top:204px"><div class="k" style="color:#45D2FF">SpO₂ <span>%</span></div><div class="v" style="font-size:46px;color:#45D2FF">93</div><div class="s">Room air</div></div>
+  <div class="box gridd" style="top:306px;height:82px"><div class="lb" style="color:#FFD84A">RESP</div><svg id="e3" width="352" height="82" style="position:absolute;left:0;top:0"></svg></div>
+  <div class="rd" style="top:306px"><div class="k" style="color:#FFD84A">RR <span>/min</span></div><div class="v" style="font-size:40px;color:#FFD84A">22</div><div class="s">Fast breathing</div></div>
+</div>
+<div class="wcard" style="left:20px;top:594px;width:535px;height:100px;background:#FFF5F5;border-color:#F6CACA;display:flex;align-items:center;gap:14px;padding:0 18px">
+  <span class="pill" style="background:#E3EFFC;color:#1C5FB2;white-space:nowrap">✦ Explainable AI · T-MECA</span>
+  <div style="flex:1"><div style="font-weight:800;font-size:15.5px;line-height:1.25">Abnormal beat: supraventricular, 0.93</div><div style="font-size:12.5px;color:var(--muted);margin-top:3px">The red band is exactly what triggered the prediction</div></div>
+  <span class="btn" style="padding:10px 18px">Explain</span></div>
+<div class="tile" style="left:20px"><small>BP</small><b>138/82</b><i>mmHg</i><em style="color:#B4510B">Raised</em></div>
+<div class="tile" style="left:156px"><small>TEMP</small><b>38.4</b><i>°C</i><em style="color:#B4510B">Fever</em></div>
+<div class="tile" style="left:292px;background:#FFF5F5;border-color:#F6CACA"><small>GCS</small><b>9</b><i>/15</i><em style="color:#C21F1F">Unconscious</em></div>
+<div class="tile" style="left:428px;background:#FFF5F5;border-color:#F6CACA"><small>NEWS2</small><b style="color:#C21F1F">9</b><em style="color:#C21F1F">High, act now</em></div>
+
+<!-- body stage -->
+<div class="stage" id="stage">
+  <div class="layers"><span class="on">All</span><span>Muscles</span><span>Skeleton</span><span>Organs</span></div>
+  <img src="body_mus.png" style="position:absolute;left:118px;top:74px;height:612px">
+  <div id="pins"></div>
+  <div id="cards"></div>
+  <div class="abs" style="left:20px;bottom:12px;font-size:10px;color:#7C93B6">Demonstration data, fictional patient.</div>
+</div>
+<div class="foot" style="bottom:2px;font-size:11.5px">Decision support. The doctor always decides. Demonstration data, fictional patient.</div>
+
+<script>
+const Q = new URLSearchParams(location.search);
+let Z = Q.get('z') || 'all';
+document.head.insertAdjacentHTML('beforeend', '<style>body.hide #allergy .real{display:none!important} body:not(.hide) #allergy .pending{display:none!important}</style>');
+if (Q.get('hide')) document.body.classList.add('hide');
+const N = (len) => ({ len, kind: 'n' }), V = (len) => ({ len, kind: 'v' });
+drawLead(document.getElementById('e1'), [N(64), N(60), V(56), N(66), N(58), N(62)], { ai: true, amp: .62, base: .64, seed: 11, sw: 2.2 });
+drawWave(document.getElementById('e2'), 'pleth', '#45D2FF'); drawWave(document.getElementById('e3'), 'resp', '#FFD84A');
+
+// body is 650 px tall, 284 px wide, at left 112 top 30 inside the stage
+const BX = 118, BY = 74, BW = 612 * 639 / 1464, BH = 612;
+const P = (fx, fy) => [BX + fx * BW, BY + fy * BH];
+const ZONES = {
+  brain: { n: 'Brain', at: P(.5, .045), c: '#2A9BE0', tc: '#1B7FC0', side: 'r' },
+  lungs: { n: 'Lungs', at: P(.40, .235), c: '#E02424', tc: '#C21F1F', side: 'l' },
+  heart: { n: 'Heart', at: P(.585, .25), c: '#E02424', tc: '#C21F1F', side: 'r' },
+  metabolism: { n: 'Metabolism', at: P(.5, .37), c: '#E08A12', tc: '#B26A0A', side: 'r' },
+  knee: { n: 'Left knee', at: P(.60, .715), c: '#22A55A', tc: '#168244', side: 'r' },
+};
+const ic = {
+  heart: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><path d="M12 21s-7.5-4.6-9.5-9.4C1 7.8 3.6 4 7.2 4c2 0 3.5 1.1 4.8 2.8C13.3 5.1 14.8 4 16.8 4c3.6 0 6.2 3.8 4.7 7.6C19.5 16.4 12 21 12 21z"/></svg>',
+  lungs: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="#1C5FB2" stroke-width="2"><path d="M12 3v8M12 11c-1 2-3 3-5 3M12 11c1 2 3 3 5 3"/><path d="M7 8c-3 1-4 6-4 9 0 2 1 3 3 3s3-2 3-5V9M17 8c3 1 4 6 4 9 0 2-1 3-3 3s-3-2-3-5V9"/></svg>',
+  brain: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="#1B7FC0" stroke-width="2"><path d="M9 4a3 3 0 00-3 3 3 3 0 00-2 5 3 3 0 002 5 3 3 0 006 0V4a3 3 0 00-3 0zM15 4a3 3 0 013 3 3 3 0 012 5 3 3 0 01-2 5 3 3 0 01-6 0"/></svg>',
+  drop: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="#B26A0A" stroke-width="2"><path d="M12 3s6 7 6 11a6 6 0 01-12 0c0-4 6-11 6-11z"/></svg>',
+  bone: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="#168244" stroke-width="2"><path d="M8 4a2 2 0 00-3 3 2 2 0 00-1 3l10 10a2 2 0 003 1 2 2 0 003-3 2 2 0 001-3L11 5a2 2 0 00-3-1z"/></svg>',
+  file: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="#1C5FB2" stroke-width="2"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg>',
+  wave: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="#1C5FB2" stroke-width="2"><path d="M2 12h4l3-7 4 14 3-7h6"/></svg>',
+};
+const ecgThumb = (id, h) => `<div class="media gridd" style="height:${h}px;background-color:#05080F"><svg id="${id}" width="374" height="${h}"></svg></div>`;
+const xrayThumb = (h, box) => `<div class="media" style="height:${h}px"><img src="thorax_final.png" style="position:absolute;left:0;top:${box ? -10 : -40}px;width:100%"><div class="hm" style="left:48px;top:${h * .52}px;width:110px;height:${h * .36}px;background:radial-gradient(circle,rgba(255,60,40,.95),rgba(255,170,40,.55) 55%,transparent 75%)"></div>${box ? `<div class="abs" style="left:40px;top:${h * .47}px;width:128px;height:${h * .44}px;border:2.5px solid #FF6B5E;border-radius:8px"></div><div class="abs" style="left:10px;top:8px;font-size:11px;font-weight:800;color:#E6EEFA">R</div><div class="abs" style="right:10px;top:8px;font-size:11px;font-weight:800;color:#E6EEFA">L</div>` : ''}</div>`;
+const imgThumb = (src, h, heat) => `<div class="media" style="height:${h}px"><img src="${src}" style="position:absolute;left:0;top:50%;width:100%;transform:translateY(-50%)">${heat || ''}</div>`;
+const spark = (id, h) => `<svg id="${id}" width="374" height="${h}" style="margin-top:10px;display:block"></svg>`;
+const CARDS = {
+  all: [
+    { t: 'Heart', i: ic.heart, chip: ['AI alert', 'red'], m: ecgThumb('ce1', 84), cap: 'ECG model, last 10 s. The highlight shows the trigger.', o: 'Open ECG' },
+    { t: 'Lungs', i: ic.lungs, chip: ['To review', 'amber'], m: xrayThumb(84, false), cap: 'Chest X-ray model: opacity at the right base.', o: 'Open X-ray' }],
+  heart: [
+    { t: 'ECG · 12 lead', i: ic.heart, chip: ['AI · T-MECA', 'violet'], m: ecgThumb('ce2', 130), score: ['Supraventricular beat', '0.93'], cap: 'Red band = what triggered the model.', o: 'Open ECG' },
+    { t: 'Echocardiography', i: ic.wave, chip: ['Normal', 'green'], m: imgThumb('echo.png', 96), cap: '5 Jul 2025 · ejection fraction 55%', o: 'Open report' }],
+  lungs: [
+    { t: 'Chest X-ray', i: ic.lungs, chip: ['AI · lung model', 'violet'], m: xrayThumb(150, true), score: ['Opacity, right lower zone', '0.87'], cap: 'Heat = where the model looked.', o: 'Open X-ray' },
+    { t: 'Oxygen saturation', i: ic.wave, chip: ['Low', 'amber'], spark: 'sp1', cap: '93% on room air, falling since 08:00', o: 'Open trend' }],
+  brain: [
+    { t: 'Brain CT', i: ic.brain, chip: ['AI · reviewed', 'violet'], m: imgThumb('brain_ct.png', 150), cap: '10:31 today · no acute bleeding detected. The doctor confirms.', o: 'Open CT' },
+    { t: 'Memory follow-up', i: ic.brain, chip: ['WassIA', 'blue'], spark: 'sp2', cap: 'Weekly speech and memory scores from home.', o: 'Open memory report' }],
+  metabolism: [
+    { t: 'HbA1c', i: ic.drop, chip: ['Critical', 'red'], spark: 'sp3', score: ['Last result', '7.8%'], cap: 'Type 2 diabetes since 2016. Target below 7%.', o: 'Open labs' },
+    { t: 'Abdominal ultrasound', i: ic.file, chip: ['Normal', 'green'], m: imgThumb('abdo_us.png', 96), cap: '2024 · liver and portal vein normal', o: 'Open report' }],
+  knee: [
+    { t: 'Knee MRI', i: ic.bone, chip: ['AI · joint model', 'violet'], m: imgThumb('knee_mri.png', 150, '<div class="hm" style="left:150px;top:62px;width:120px;height:50px;background:radial-gradient(ellipse,rgba(255,60,40,.85),rgba(255,170,40,.45) 55%,transparent 75%)"></div>'), score: ['Osteoarthritis, grade 2', '0.81'], cap: 'Heat = narrowed joint space the model used.', o: 'Open MRI' },
+    { t: 'Pain treatment', i: ic.file, chip: ['Interaction', 'red'], cap: 'Ibuprofen as needed reduces the effect of amlodipine. Paracetamol preferred.', o: 'Open in consultation' }],
+};
+function render() {
+  const pins = document.getElementById('pins'); let h = '';
+  for (const [k, z] of Object.entries(ZONES)) {
+    const [x, y] = z.at; const on = Z === k;
+    if (on) h += `<div class="halo" style="left:${x}px;top:${y}px;background:${z.c}22;border:3px solid ${z.c}88"></div>`;
+    h += `<div class="pin2" data-z="${k}" style="left:${x}px;top:${y}px;background:${z.c};${on ? 'width:26px;height:26px' : ''}"></div>`;
+    const lx = z.side === 'l' ? x - 22 : x + 22;
+    h += `<div class="plab" data-z="${k}" style="${z.side === 'l' ? `right:${1012 - lx}px` : `left:${lx}px`};top:${y}px;color:${z.tc};${on ? `background:${z.c};color:#fff` : ''}">${z.n}</div>`;
+  }
+  pins.innerHTML = h;
+  const cs = CARDS[Z] || CARDS.all; let c = ''; let y = Z === 'all' ? 128 : 72;
+  if (Z !== 'all') c += `<div class="abs" style="left:582px;top:20px;display:flex;align-items:center;gap:10px"><span style="width:14px;height:14px;border-radius:50%;background:${ZONES[Z].c}"></span><span style="font-size:24px;font-weight:800">${ZONES[Z].n}</span><span style="color:var(--soft);font-size:13.5px">linked exams and their AI models</span></div>`;
+  cs.forEach((d, i) => {
+    c += `<div class="zc" style="top:${y}px"><div class="t">${d.i}${d.t}<span class="chip ${d.chip[1]}">${d.chip[0]}</span></div>${d.m || ''}${d.spark ? spark(d.spark, 64) : ''}${d.score ? `<div class="score"><b>${d.score[0]}</b><span>${d.score[1]}</span></div>${d.score[1].includes('%') ? '' : `<div class="bar" style="margin-top:6px"><i style="width:${parseFloat(d.score[1]) * 100}%;background:#E02424"></i></div>`}` : ''}<div class="cap">${d.cap}</div><div class="open">${d.o} →</div></div>`;
+    y += 0;
+  });
+  document.getElementById('cards').innerHTML = c;
+  // stack cards with measured heights
+  let yy = Z === 'all' ? 128 : 72;
+  document.querySelectorAll('.zc').forEach((el) => { el.style.top = yy + 'px'; yy += el.offsetHeight + 14; });
+  if (Z === 'all') document.getElementById('cards').insertAdjacentHTML('beforeend', `<div class="hint" style="left:582px;top:${yy + 10}px">Tap a zone: its AI model and exams open</div>`);
+  else document.getElementById('cards').insertAdjacentHTML('beforeend', `<div class="hint" data-z="all" style="right:20px;bottom:18px;cursor:pointer">← Whole body</div>`);
+  const L = (id, beats, o) => { const e = document.getElementById(id); if (e) drawLead(e, beats, o); };
+  L('ce1', [N(60), N(58), V(52), N(62), N(56), N(60)], { ai: true, amp: .62, base: .66, seed: 4, sw: 2 });
+  L('ce2', [N(60), N(58), V(52), N(62), N(56), N(60)], { ai: true, amp: .62, base: .66, seed: 7, sw: 2.2 });
+  const SP = (id, vals, col, lo, hi, dash) => { const e = document.getElementById(id); if (!e) return; const W = 374, H = 64; let p = ''; vals.forEach((v, i) => p += (i ? 'L' : 'M') + (6 + i * (W - 12) / (vals.length - 1)).toFixed(1) + ' ' + (H - 8 - (v - lo) / (hi - lo) * (H - 16)).toFixed(1)); e.innerHTML = (dash ? `<line x1="0" x2="${W}" y1="${H - 8 - (dash - lo) / (hi - lo) * (H - 16)}" y2="${H - 8 - (dash - lo) / (hi - lo) * (H - 16)}" stroke="#94A3B8" stroke-dasharray="4 5"/>` : '') + `<path d="${p}" fill="none" stroke="${col}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>` + vals.map((v, i) => `<circle cx="${6 + i * (W - 12) / (vals.length - 1)}" cy="${H - 8 - (v - lo) / (hi - lo) * (H - 16)}" r="3.5" fill="${col}"/>`).join(''); };
+  SP('sp1', [97, 97, 96, 96, 95, 94, 94, 93], '#2A9BE0', 90, 99, 94);
+  SP('sp2', [62, 60, 61, 57, 55, 52, 50, 46], '#2A7DE1', 40, 68);
+  SP('sp3', [6.9, 7.1, 7.2, 7.4, 7.5, 7.8], '#DC2626', 6.4, 8.2, 7);
+  document.querySelectorAll('[data-z]').forEach((el) => el.onclick = () => { Z = el.dataset.z; render(); });
+}
+render();
+</script></body></html>
