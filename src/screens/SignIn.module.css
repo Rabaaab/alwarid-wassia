@@ -1,4 +1,4 @@
-.root{position:relative}
+.root{position:relative;line-height:normal}
 .root input::placeholder{color:#94a3b8;font-weight:500}
 .root button{font-family:inherit;cursor:pointer}
 .root a:focus-visible,.root button:focus-visible,.root input:focus-visible{outline:3px solid #6fc6ec;outline-offset:2px}

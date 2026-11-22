@@ -12,7 +12,7 @@ const pageBg = 'radial-gradient(900px 500px at 12% 0%,rgba(125,189,244,0.55),tra
 
 export default function EpidemiePage() {
     return (
-        <div style={{ minHeight: '100vh', boxSizing: 'border-box', fontFamily: "'Plus Jakarta Sans',system-ui,sans-serif", color: '#0f172a', background: pageBg, padding: '24px 32px 48px' }}>
+        <div style={{ minHeight: '100vh', lineHeight: 'normal', boxSizing: 'border-box', fontFamily: "'Plus Jakarta Sans',system-ui,sans-serif", color: '#0f172a', background: pageBg, padding: '24px 32px 48px' }}>
             <div style={{ maxWidth: 1240, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
                 <DoctorHeader active="Épidémie" />
                 <div>

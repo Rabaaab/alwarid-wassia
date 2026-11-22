@@ -1,6 +1,7 @@
 'use client';
 import { useMemo, useState } from 'react';
 import Body3D from '@/components/Body3D';
+import AnatomyViewer from '@/components/AnatomyViewer';
 import { REGION_ZONES } from '@/data/bodyZones';
 
 /*
@@ -26,7 +27,7 @@ export function BodyViewer3D({ onRegionSelect, regions, selectedRegion, style })
     const active = selectedRegion !== undefined && selectedRegion !== null ? selectedRegion : local;
     return (
         <div style={{ width: '100%', height: '100%', ...style }}>
-            <Body3D
+            <AnatomyViewer
                 zones={zones}
                 zone={active}
                 height="100%"

@@ -51,7 +51,17 @@ The old routes (`/role`, `/search`, `/mode`, `/dashboard`, `/epidemie`, `/body_v
 
 ## 3D body
 
-`public/models/body-opt.glb` is `body.glb` with its 826 meshes merged by material and re-compressed (8 MB to 0.9 MB, loads in under a second). The organs are stylised shapes placed inside the rib cage and abdomen (`src/components/Body3D.js`). Zones and their exams are in `src/data/bodyZones.js`. The Draco decoder is served from `public/draco`.
+The patient file and the Urgence and Consultation modes use the [Svitylo 3D Anatomy Atlas](https://github.com/authorOd/3d-anatomy-atlas) (`@authorod/svitylo-3d-anatomy-atlas`, a `<svitylo-anatomy>` web component) wrapped in `src/components/AnatomyViewer.js`. The lighter "economy" data (about 22 MB) is served from `public/anatomy-data/1.2.0`; the 57 MB "standard" set is not included. The wrapper adds our layer buttons (Tout, Muscles, Squelette, Organes, Vaisseaux), places clickable dots on the body (positions projected from the atlas camera, so they follow rotation and zoom) and connects our zones (`src/data/bodyZones.js`) to atlas structures. Clicking a dot or an organ highlights the zone and opens its exams; it never hides or shows structures.
+
+**Modesty.** The genital organs, the urogenital skin patches, pubic hair, perineal muscles and the related vessels are hidden permanently (`HIDE` in `AnatomyViewer.js`). The atlas search bar and side panels are hidden too.
+
+**Fallback.** If the atlas fails to load, or the URL has `?body=legacy`, the app uses our lighter model `public/models/body-bp3d.glb` through `src/components/Body3D.js` (BodyParts3D, genital area removed).
+
+**Credits and licences (shown under the viewer).**
+- Viewer code: CPAL-1.0. Its attribution terms require the visible Svitylo logo, which the component shows and which must stay.
+- Data: Z-Anatomy and BodyParts3D, CC BY-SA 4.0 (share-alike: derived data must stay under the same terms); kidneys from the Human Reference Atlas and the ear from OpenEar, CC BY 4.0. The full list is in `public/anatomy-data/1.2.0/ATTRIBUTION.md` and `LICENSES.md`.
+- The atlas author labels this data a "preview" whose licence audit is still pending. Check the project page before any commercial use.
+- Our fallback model: BodyParts3D, (c) The Database Center for Life Science, CC BY 4.0, with axes converted, meshes merged and simplified.
 
 ## Screens
 

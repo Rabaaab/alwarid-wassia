@@ -125,7 +125,7 @@ export default function PatientPlatform() {
   const [selectedPrescriptionId, setSelectedPrescriptionId] = useState(patientProfile.prescriptions[0].id);
   const [qrDataUrl, setQrDataUrl] = useState('');
   const [messages, setMessages] = useState([
-    { role: 'assistant', text: 'Salam Youssef! Kifach n9dar n3awnek lyoum?' },
+    { role: 'assistant', text: 'Salam Amina! Kifach n9dar n3awnek lyoum?' },
   ]);
   const chatScrollRef = useRef(null);
 

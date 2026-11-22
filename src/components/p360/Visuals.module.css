@@ -1,0 +1,6 @@
+.spark { display: block; margin-top: 10px; }
+.scan { position: relative; border-radius: 14px; overflow: hidden; background: #000; }
+.scan img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.heat { position: absolute; border-radius: 50%; filter: blur(12px); background: radial-gradient(circle, rgba(255, 60, 40, .95), rgba(255, 170, 40, .55) 55%, transparent 75%); pointer-events: none; }
+.box { position: absolute; border: 2.5px solid #FF6B5E; border-radius: 8px; pointer-events: none; }
+.lr { position: absolute; top: 8px; font-size: 11px; font-weight: 800; color: #E6EEFA; }

@@ -4,11 +4,11 @@
 
 export const MOCK_PATIENTS = [
     {
-        id: "PAT-2024-00147",
-        firstName: "Youssef",
-        lastName: "Kacimi",
-        initials: "YK",
-        age: 58,
+        id: "PAT-2026-00072",
+        firstName: "Amina",
+        lastName: "El Idrissi",
+        initials: "AM",
+        age: 72,
         dateOfBirth: "1968-03-15",
         sex: "Homme",
         bloodType: "A+",
@@ -16,7 +16,7 @@ export const MOCK_PATIENTS = [
         weight: "89 kg",
         city: "Fes",
         phone: "+212 6 12 34 56 78",
-        emergencyContact: "Fatima Kacimi (epouse) — +212 6 23 45 67 89",
+        emergencyContact: "Hassan El Idrissi (epoux) — +212 6 23 45 67 89",
         allergies: ["Penicilline", "Sulfamides"],
         conditions: [
             { name: "Diabete type 2", severity: "critical", since: "2016", details: "HbA1c : 7.8%" },
@@ -187,7 +187,7 @@ export const MOCK_PATIENTS = [
 // ═══ RECENT PATIENTS — Chacun avec un use case different ═══
 export const RECENT_PATIENTS = [
     {
-        id: "PAT-2024-00147", name: "Youssef Kacimi", initials: "YK",
+        id: "PAT-2026-00072", name: "Amina El Idrissi", initials: "AM",
         age: 58, sex: "H", lastVisit: "15/01/2026", alerts: 3, alertLevel: "critical",
         useCase: "Diabete + HTA + Cardio", specialty: "Cardiologie / Diabetologie"
     },

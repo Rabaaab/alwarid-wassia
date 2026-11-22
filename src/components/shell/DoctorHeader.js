@@ -4,11 +4,11 @@ import { usePlatform, pendingResults } from '@/lib/platformStore';
 import styles from './DoctorHeader.module.css';
 
 const NAV = [
-    { label: 'Accueil', href: '/doctor' },
-    { label: 'Patients', href: '/doctor/patient' },
-    { label: 'Résultats', href: '/doctor/results', badge: 3 },
-    { label: 'Transferts', href: '/doctor/mode/transfert' },
-    { label: 'Épidémie', href: '/doctor/epidemie', badge: 2 },
+    { key: 'Accueil', label: 'Home', href: '/doctor' },
+    { key: 'Patients', label: 'Patients', href: '/doctor/patient' },
+    { key: 'Résultats', label: 'Results', href: '/doctor/results', badge: 3 },
+    { key: 'Transferts', label: 'Transfers', href: '/doctor/mode/transfert' },
+    { key: 'Épidémie', label: 'Epidemics', href: '/doctor/epidemie', badge: 2 },
 ];
 
 export default function DoctorHeader({ active = 'Accueil' }) {
@@ -17,14 +17,14 @@ export default function DoctorHeader({ active = 'Accueil' }) {
     return (
         <header className={styles.glass}>
             <div className={styles.left}>
-                <SmartLink href="/doctor" aria-label="Alwarid, accueil">
+                <SmartLink href="/doctor" aria-label="Alwarid, home">
                     <img src="/ui/logo-wide.png" alt="Alwarid" className={styles.logo} />
                 </SmartLink>
-                <nav aria-label="Navigation principale" className={styles.nav}>
+                <nav aria-label="Main navigation" className={styles.nav}>
                     {NAV.map((n) => (
-                        <SmartLink key={n.label} href={n.href} className={`${styles.nv} ${n.label === active ? styles.on : ''}`}>
+                        <SmartLink key={n.key} href={n.href} className={`${styles.nv} ${n.key === active ? styles.on : ''}`}>
                             {n.label}
-                            {(n.label === 'Résultats' ? pending : n.badge) ? <span className={styles.bd}>{n.label === 'Résultats' ? pending : n.badge}</span> : null}
+                            {(n.key === 'Résultats' ? pending : n.badge) ? <span className={styles.bd}>{n.key === 'Résultats' ? pending : n.badge}</span> : null}
                         </SmartLink>
                     ))}
                 </nav>
@@ -35,11 +35,11 @@ export default function DoctorHeader({ active = 'Accueil' }) {
                     {pending > 0 ? <span aria-hidden="true" className={styles.dot} /> : null}
                 </SmartLink>
                 <span aria-hidden="true" className={styles.sep} />
-                <SmartLink href="/" className={styles.who} aria-label="Dr. Mounir Alaoui, changer de compte">
+                <SmartLink href="/" className={styles.who} aria-label="Dr. Mounir Alaoui, switch account">
                     <img src="/ui/doctor-avatar.jpg" alt="Dr. Mounir Alaoui" className={styles.avatar} />
                     <span>
                         <span className={styles.name} style={{ display: 'block' }}>Dr. M. Alaoui</span>
-                        <span className={styles.role} style={{ display: 'block' }}>Neurologue</span>
+                        <span className={styles.role} style={{ display: 'block' }}>Internal medicine</span>
                     </span>
                 </SmartLink>
             </div>

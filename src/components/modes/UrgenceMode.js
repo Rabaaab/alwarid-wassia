@@ -411,27 +411,16 @@ Genere par Alwarid — Outil d'aide a la decision`}</pre>
                 padding: '16px 24px', animation: 'fadeInUp 0.3s ease both'
             }}>
                 <div style={{ maxWidth: 1120, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                        <div style={{
-                            width: 56, height: 56, borderRadius: 'var(--radius-md)', background: 'var(--primary-50)',
-                            color: 'var(--primary-700)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontWeight: 700, fontSize: 20, flexShrink: 0
-                        }}>YK</div>
-                        <div>
-                            <div style={{ fontSize: 20, fontWeight: 700 }}>Youssef Kacimi</div>
-                            <div style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: "'IBM Plex Mono', monospace" }}>PAT-2024-00147 — 58 ans, Homme</div>
-                        </div>
-                    </div>
-                    <div style={{ display: 'flex', gap: 12, flex: 1, justifyContent: 'center', flexWrap: 'wrap' }}>
-                        <div style={{ padding: '10px 20px', borderRadius: 'var(--radius-lg)', background: '#dc2626', color: 'white', fontWeight: 700, fontSize: 18, display: 'flex', alignItems: 'center', gap: 10, boxShadow: '0 2px 8px rgba(220,38,38,0.3)' }}>
+                    <div style={{ display: 'flex', gap: 12, flex: 1, justifyContent: 'flex-start', flexWrap: 'wrap' }}>
+                        <div style={{ padding: '9px 16px', borderRadius: 999, background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca', fontWeight: 700, fontSize: 15, display: 'flex', alignItems: 'center', gap: 8, }}>
                             {ICN.heart} Gr. sanguin : A+
                         </div>
-                        <div style={{ padding: '10px 20px', borderRadius: 'var(--radius-lg)', background: '#dc2626', color: 'white', fontWeight: 700, fontSize: 18, display: 'flex', alignItems: 'center', gap: 10, boxShadow: '0 2px 8px rgba(220,38,38,0.3)' }}>
+                        <div style={{ padding: '9px 16px', borderRadius: 999, background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca', fontWeight: 700, fontSize: 15, display: 'flex', alignItems: 'center', gap: 8, }}>
                             {ICN.warn} Allergies : Penicilline, Sulfamides
                         </div>
                     </div>
                     <button className="btn btn-lg" style={{ background: 'white', color: 'var(--severity-critical)', border: '2px solid var(--severity-critical)', fontWeight: 600, gap: 8 }} onClick={() => setShowProtocole(true)}>
-                        {ICN.doc} Protocole rapide
+                        {ICN.doc} Résumé d&apos;urgence
                     </button>
                 </div>
             </div>

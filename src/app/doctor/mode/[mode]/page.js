@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import DoctorHeader from '@/components/shell/DoctorHeader';
 import PatientBar from '@/components/shell/PatientBar';
 import PopupAIChat from '@/components/PopupAIChat';
+import ConsultationChat from '@/screens/ConsultationChat';
 
 const Loading = () => <div style={{ padding: 60, textAlign: 'center', color: '#1c5fb2', fontWeight: 700 }}>Chargement…</div>;
 const MODES = {
@@ -17,13 +18,14 @@ const pageBg = 'radial-gradient(900px 500px at 12% 0%,rgba(125,189,244,0.55),tra
 export default function ModePage({ params }) {
     const { mode } = use(params);
     const key = MODES[mode] ? mode : 'consultation';
+    if (key === 'consultation') return <ConsultationChat />;
     const Mode = MODES[key];
     return (
-        <div style={{ minHeight: '100vh', boxSizing: 'border-box', fontFamily: "'Plus Jakarta Sans',system-ui,sans-serif", color: '#0f172a', background: pageBg, padding: '24px 32px 48px' }}>
+        <div style={{ minHeight: '100vh', lineHeight: 'normal', boxSizing: 'border-box', fontFamily: "'Plus Jakarta Sans',system-ui,sans-serif", color: '#0f172a', background: pageBg, padding: '24px 32px 48px' }}>
             <div style={{ maxWidth: 1240, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
                 <DoctorHeader active={key === 'transfert' ? 'Transferts' : 'Patients'} />
                 <PatientBar active={key} />
-                <div className="aw-legacy" style={{ background: '#ffffff', borderRadius: 40, padding: 24, boxShadow: '0 30px 60px -36px rgba(28,95,178,0.45)', overflow: 'hidden' }}>
+                <div className="aw-legacy" style={{ background: '#ffffff', borderRadius: 36, padding: 24, boxShadow: '0 0 0 1px rgba(28,95,178,0.05), 0 1px 2px rgba(15,40,90,0.04), 0 14px 34px -14px rgba(28,95,178,0.16), 0 44px 84px -46px rgba(28,95,178,0.3)', overflow: 'hidden' }}>
                     <Mode />
                 </div>
             </div>

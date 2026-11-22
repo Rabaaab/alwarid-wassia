@@ -5,12 +5,42 @@ import { OrbitControls, useGLTF, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { ZONES } from '@/data/bodyZones';
 
+/*
+ * Corps humain 3D interactif.
+ * Anatomie : BodyParts3D, (c) The Database Center for Life Science, licence CC BY 4.0
+ * (adaptation : axes et unités convertis, maillages regroupés et simplifiés).
+ * Le modèle ne contient pas les poumons ni le foie entiers : ils sont dessinés en formes
+ * translucides autour des bronches et des voies biliaires réelles.
+ */
+const MODEL_URL = '/models/body-bp3d.glb';
 useGLTF.setDecoderPath('/draco/');
-useGLTF.preload('/models/body-opt.glb', true);
+useGLTF.preload(MODEL_URL, true);
 
-const HOME = { target: [0, 0.9, 0], dist: 3.4 };
+const HOME = { target: [0, 0.97, 0], dist: 3.75 };
 
-/* ───────────── Organes (formes stylisées, positionnées dans le thorax et l'abdomen) ───────────── */
+const STYLE = {
+    skin: { color: '#8fc3ee', roughness: 0.25 },
+    bones: { color: '#efe6d2', roughness: 0.6 },
+    muscles: { color: '#b84a42', roughness: 0.55 },
+    arteries: { color: '#e03b3b', roughness: 0.45 },
+    veins: { color: '#3a6fd6', roughness: 0.45 },
+    brain: { color: '#e9aab0', roughness: 0.6 },
+    heart: { color: '#c63a3a', roughness: 0.5 },
+    bronchi: { color: '#eab6aa', roughness: 0.5 },
+    stomach: { color: '#da857d', roughness: 0.55 },
+    intestines: { color: '#e4a89c', roughness: 0.55 },
+    pancreas: { color: '#e2b46d', roughness: 0.55 },
+    biliary: { color: '#4f9a62', roughness: 0.5 },
+    kidneys: { color: '#a24d46', roughness: 0.5 },
+    bladder: { color: '#e2baa2', roughness: 0.5 },
+    spleen: { color: '#8f3550', roughness: 0.55 },
+};
+const LAYER_OF = { skin: 'skin', bones: 'bones', muscles: 'muscles', arteries: 'arteries', veins: 'veins' };
+const ORGAN_ZONE = { brain: 'head', heart: 'chest', bronchi: 'chest', stomach: 'abdomen', intestines: 'abdomen', pancreas: 'abdomen', biliary: 'abdomen', kidneys: 'abdomen', bladder: 'abdomen', spleen: 'abdomen' };
+// nom du maillage -> nom utilisé dans les listes `organs` des zones
+const ORGAN_KEY = { brain: 'brain', heart: 'heart', bronchi: 'lungs', stomach: 'stomach', intestines: 'intestines', pancreas: 'abdomen', biliary: 'liver', kidneys: 'kidneys', bladder: 'abdomen', spleen: 'abdomen' };
+
+/* ───────────── Poumons et foie (formes translucides) ───────────── */
 function lumpy(geo, amp, freq, seed = 0) {
     const p = geo.attributes.position;
     const v = new THREE.Vector3();
@@ -23,112 +53,102 @@ function lumpy(geo, amp, freq, seed = 0) {
     geo.computeVertexNormals();
     return geo;
 }
+const makeLung = () => lumpy(new THREE.SphereGeometry(1, 40, 32), 0.05, 6, 1);
+const makeLiver = () => lumpy(new THREE.SphereGeometry(1, 36, 28), 0.07, 5, 3);
 
-function Organ({ id, zone, active, dim, color, position, scale, rotation = [0, 0, 0], geometry, onPick }) {
+function Soft({ id, zone, active, dim, level, color, position, scale, rotation = [0, 0, 0], make, base, onPick }) {
     const ref = useRef();
-    const geo = useMemo(() => geometry(), [geometry]);
+    const geo = useMemo(() => make(), [make]);
     useFrame((s) => {
         const m = ref.current;
         if (!m) return;
-        const pulse = active ? 0.35 + Math.sin(s.clock.elapsedTime * 3) * 0.2 : 0;
+        const pulse = active ? 0.3 + Math.sin(s.clock.elapsedTime * 3) * 0.18 : 0;
         m.material.emissiveIntensity = THREE.MathUtils.lerp(m.material.emissiveIntensity, pulse, 0.15);
-        const target = dim ? 0.35 : 1;
+        const target = (dim ? 0.18 : base) * level;
         m.material.opacity = THREE.MathUtils.lerp(m.material.opacity, target, 0.12);
     });
     return (
         <mesh
-            ref={ref} geometry={geo} position={position} scale={scale} rotation={rotation}
+            ref={ref} geometry={geo} position={position} scale={scale} rotation={rotation} visible={level > 0}
             onClick={(e) => { e.stopPropagation(); onPick(zone); }}
             onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = 'pointer'; }}
             onPointerOut={() => { document.body.style.cursor = 'auto'; }}
         >
-            <meshStandardMaterial color={color} roughness={0.55} metalness={0.05} emissive={color} emissiveIntensity={0} transparent opacity={1} />
+            <meshStandardMaterial color={color} roughness={0.6} metalness={0.02} emissive={color} emissiveIntensity={0} transparent opacity={base * level} depthWrite={false} />
         </mesh>
     );
 }
 
-const G = {
-    sphere: (a, f, s) => () => lumpy(new THREE.IcosahedronGeometry(1, 4), a, f, s),
-    smooth: () => () => new THREE.SphereGeometry(1, 36, 28),
-    coil: () => {
-        const pts = [];
-        const rows = 6, per = 5;
-        for (let r = 0; r < rows; r++) {
-            for (let i = 0; i < per; i++) {
-                const t = i / (per - 1);
-                const x = (r % 2 === 0 ? t : 1 - t) * 2 - 1;
-                pts.push(new THREE.Vector3(x, 1 - (r + t * 0.0) * (2 / (rows - 1)) + Math.sin(t * Math.PI) * -0.08, Math.sin((r + t) * 1.7) * 0.25));
-            }
-        }
-        return () => new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, false, 'catmullrom', 0.5), 220, 0.075, 12, false);
-    },
-};
-const COIL = G.coil();
-const GEO = {
-    smooth: G.smooth(),
-    brain: G.sphere(0.07, 38, 0.4),
-    heart: G.sphere(0.12, 30, 1.1),
-    liver: G.sphere(0.06, 24, 0.7),
-    stomach: G.sphere(0.08, 20, 1.3),
-    coil: COIL,
-};
-
-function Organs({ zoneDef, visible, onPick }) {
-    if (!visible) return null;
-    const on = (id) => zoneDef && zoneDef.organs.includes(id);
-    const anyOrgan = zoneDef && zoneDef.organs.length > 0;
-    const dim = (id) => anyOrgan && !on(id);
+function SoftOrgans({ zoneDef, level, onPick }) {
+    const on = (k) => zoneDef && zoneDef.organs.includes(k);
+    const any = zoneDef && zoneDef.organs.length > 0;
+    const dim = (k) => any && !on(k);
     return (
         <group>
-            <Organ id="brain" zone="head" color="#e8a3a8" active={on('brain')} dim={dim('brain')} position={[0, 1.645, -0.022]} scale={[0.066, 0.052, 0.078]} geometry={GEO.brain} onPick={onPick} />
-            <Organ id="lungR" zone="chest" color="#e7a5a3" active={on('lungs')} dim={dim('lungs')} position={[-0.078, 1.32, 0.0]} scale={[0.056, 0.11, 0.07]} geometry={GEO.smooth} onPick={onPick} />
-            <Organ id="lungL" zone="chest" color="#e7a5a3" active={on('lungs')} dim={dim('lungs')} position={[0.078, 1.32, 0.0]} scale={[0.05, 0.11, 0.068]} geometry={GEO.smooth} onPick={onPick} />
-            <Organ id="heart" zone="chest" color="#c8322f" active={on('heart')} dim={dim('heart')} position={[0.028, 1.31, 0.035]} rotation={[0, 0, -0.5]} scale={[0.04, 0.056, 0.042]} geometry={GEO.heart} onPick={onPick} />
-            <Organ id="liver" zone="abdomen" color="#8d3b2d" active={on('liver')} dim={dim('liver')} position={[-0.065, 1.145, 0.025]} rotation={[0, 0, 0.18]} scale={[0.09, 0.045, 0.055]} geometry={GEO.liver} onPick={onPick} />
-            <Organ id="stomach" zone="abdomen" color="#d98b84" active={on('stomach')} dim={dim('stomach')} position={[0.058, 1.14, 0.03]} rotation={[0, 0, -0.9]} scale={[0.06, 0.036, 0.04]} geometry={GEO.stomach} onPick={onPick} />
-            <Organ id="kidneyR" zone="abdomen" color="#9b4a3f" active={on('kidneys')} dim={dim('kidneys')} position={[-0.062, 1.08, -0.045]} scale={[0.022, 0.04, 0.018]} geometry={GEO.smooth} onPick={onPick} />
-            <Organ id="kidneyL" zone="abdomen" color="#9b4a3f" active={on('kidneys')} dim={dim('kidneys')} position={[0.062, 1.08, -0.045]} scale={[0.022, 0.04, 0.018]} geometry={GEO.smooth} onPick={onPick} />
-            <Organ id="intestines" zone="abdomen" color="#e0a199" active={on('intestines')} dim={dim('intestines')} position={[0, 0.985, 0.025]} scale={[0.082, 0.062, 0.07]} geometry={GEO.coil} onPick={onPick} />
+            <Soft id="lungR" zone="chest" level={level} color="#e9a9a6" base={0.42} active={on('lungs')} dim={dim('lungs')} position={[-0.078, 1.315, 0.0]} scale={[0.058, 0.118, 0.078]} make={makeLung} onPick={onPick} />
+            <Soft id="lungL" zone="chest" level={level} color="#e9a9a6" base={0.42} active={on('lungs')} dim={dim('lungs')} position={[0.082, 1.315, 0.0]} scale={[0.052, 0.118, 0.074]} make={makeLung} onPick={onPick} />
+            <Soft id="liver" zone="abdomen" level={level} color="#9a4132" base={0.5} active={on('liver')} dim={dim('liver')} position={[-0.055, 1.165, 0.03]} rotation={[0, 0, 0.16]} scale={[0.1, 0.052, 0.066]} make={makeLiver} onPick={onPick} />
         </group>
     );
 }
 
-/* ───────────── Modèle anatomique (muscles et squelette) ───────────── */
-function BodyModel({ layers }) {
-    const { scene } = useGLTF('/models/body-opt.glb', true);
-    const groups = useMemo(() => {
-        const g = { bone: new Set(), muscle: new Set() };
+/* ───────────── Modèle BodyParts3D ───────────── */
+function makeMaterial(name) {
+    const st = STYLE[name];
+    return new THREE.MeshStandardMaterial({ color: st.color, roughness: st.roughness, metalness: 0.02, emissive: st.color, emissiveIntensity: 0, transparent: true, side: name === 'skin' ? THREE.FrontSide : THREE.DoubleSide });
+}
+
+function Anatomy({ layers, zoneDef, onPick }) {
+    const { scene } = useGLTF(MODEL_URL, true);
+    const meshes = useMemo(() => {
+        const m = {};
         scene.traverse((o) => {
-            if (!o.isMesh) return;
-            const name = (o.material && o.material.name) || '';
-            (/muscle/i.test(name) ? g.muscle : g.bone).add(o.material);
+            if (!o.isMesh || !STYLE[o.name]) return;
+            o.material = makeMaterial(o.name);
+            o.frustumCulled = false;
+            m[o.name] = o;
         });
-        return g;
+        return m;
     }, [scene]);
 
     useEffect(() => {
-        groups.bone.forEach((m) => {
-            m.visible = layers.bone;
-            m.color = new THREE.Color('#efe6d2');
-            m.roughness = 0.6;
-            m.metalness = 0;
-            m.needsUpdate = true;
+        Object.entries(meshes).forEach(([name, mesh]) => {
+            const level = layers[LAYER_OF[name] || 'organs'];
+            mesh.visible = level > 0;
+            mesh.userData.level = level;
+            mesh.material.depthWrite = level >= 1;
+            if (LAYER_OF[name]) mesh.material.opacity = level;
+            mesh.renderOrder = name === 'skin' ? 5 : 0;
         });
-        groups.muscle.forEach((m) => {
-            m.visible = layers.muscle;
-            m.transparent = layers.muscleOpacity < 1;
-            m.opacity = layers.muscleOpacity;
-            m.depthWrite = layers.muscleOpacity >= 0.98;
-            m.side = THREE.DoubleSide;
-            m.needsUpdate = true;
-        });
-    }, [groups, layers]);
+    }, [meshes, layers]);
 
     useEffect(() => {
         if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') window.__body = { scene, THREE };
     }, [scene]);
 
-    return <primitive object={scene} />;
+    useFrame((s) => {
+        const any = zoneDef && zoneDef.organs.length > 0;
+        Object.entries(meshes).forEach(([name, mesh]) => {
+            if (LAYER_OF[name] || !mesh.visible) return;
+            const key = ORGAN_KEY[name];
+            const active = zoneDef && zoneDef.organs.includes(key);
+            const pulse = active ? 0.28 + Math.sin(s.clock.elapsedTime * 3) * 0.16 : 0;
+            mesh.material.emissiveIntensity = THREE.MathUtils.lerp(mesh.material.emissiveIntensity, pulse, 0.15);
+            const target = (any && !active ? 0.2 : 1) * (mesh.userData.level ?? 1);
+            mesh.material.opacity = THREE.MathUtils.lerp(mesh.material.opacity, target, 0.12);
+            mesh.material.depthWrite = mesh.material.opacity > 0.98;
+        });
+    });
+
+    const hit = (e) => e.intersections.find((i) => ORGAN_ZONE[i.object.name] && i.object.visible);
+    return (
+        <primitive
+            object={scene}
+            onClick={(e) => { const h = hit(e); if (h) { e.stopPropagation(); onPick(ORGAN_ZONE[h.object.name]); } }}
+            onPointerMove={(e) => { document.body.style.cursor = hit(e) ? 'pointer' : 'auto'; }}
+            onPointerOut={() => { document.body.style.cursor = 'auto'; }}
+        />
+    );
 }
 
 /* ───────────── Caméra : glisse vers la zone choisie ───────────── */
@@ -164,6 +184,7 @@ function CameraRig({ focus, nonce, controlsRef, zonesById }) {
 }
 
 function Hotspot({ z, on, onPick, dotOnly }) {
+    const showLabel = !dotOnly && (on || z.alwaysLabel);
     return (
         <Html position={z.anchor} zIndexRange={[20, 0]} style={{ pointerEvents: 'none' }}>
             <div style={{ position: 'relative', width: 0, height: 0 }}>
@@ -175,7 +196,7 @@ function Hotspot({ z, on, onPick, dotOnly }) {
                         transform: `scale(${on ? 1.2 : 1})`, transition: 'all 220ms ease',
                     }}
                 />
-                {dotOnly ? null : <button
+                {showLabel ? <button
                     type="button" onClick={() => onPick(z.id)}
                     style={{
                         pointerEvents: 'auto', position: 'absolute', left: 24, top: -17, whiteSpace: 'nowrap', minHeight: 34, border: 'none', borderRadius: 999, padding: '0 14px',
@@ -184,17 +205,18 @@ function Hotspot({ z, on, onPick, dotOnly }) {
                     }}
                 >
                     {z.label}
-                </button>}
+                </button> : null}
             </div>
         </Html>
     );
 }
 
 const PRESETS = [
-    { id: 'all', label: 'Tout', layers: { muscle: true, bone: true, organs: true, muscleOpacity: 0.22 } },
-    { id: 'body', label: 'Muscles', layers: { muscle: true, bone: false, organs: false, muscleOpacity: 1 } },
-    { id: 'bones', label: 'Squelette', layers: { muscle: false, bone: true, organs: false, muscleOpacity: 1 } },
-    { id: 'organs', label: 'Organes', layers: { muscle: false, bone: true, organs: true, muscleOpacity: 1 } },
+    { id: 'all', label: 'Tout', layers: { skin: 0.1, bones: 0.55, muscles: 0, organs: 1, arteries: 0, veins: 0 } },
+    { id: 'muscles', label: 'Muscles', layers: { skin: 0, bones: 0, muscles: 1, organs: 0, arteries: 0, veins: 0 } },
+    { id: 'bones', label: 'Squelette', layers: { skin: 0, bones: 1, muscles: 0, organs: 0, arteries: 0, veins: 0 } },
+    { id: 'organs', label: 'Organes', layers: { skin: 0.07, bones: 0.2, muscles: 0, organs: 1, arteries: 0, veins: 0 } },
+    { id: 'vessels', label: 'Vaisseaux', layers: { skin: 0.07, bones: 0.12, muscles: 0, organs: 0.35, arteries: 1, veins: 1 } },
 ];
 
 export default function Body3D({ zones = ZONES, zone, onZoneChange, height = 760, mini = false }) {
@@ -211,21 +233,22 @@ export default function Body3D({ zones = ZONES, zone, onZoneChange, height = 760
         if (!z) return;
         onZoneChange(id);
         setSpin(false);
-        if (z.organs.length && preset !== 'organs' && preset !== 'all') setPreset('organs');
+        if (z.organs.length && ['muscles', 'bones', 'vessels'].includes(preset)) setPreset('organs');
         setNonce((n) => n + 1);
     };
 
     return (
-        <div style={{ position: 'relative', width: '100%', height, borderRadius: mini ? 16 : 28, overflow: 'hidden', background: 'radial-gradient(70% 55% at 50% 40%, #eaf5fe 0%, #d6e9f9 60%, #c5def4 100%)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height }}>
+        <div style={{ position: 'relative', flex: 1, minHeight: 0, borderRadius: mini ? 16 : 28, overflow: 'hidden', background: 'radial-gradient(70% 55% at 50% 40%, #eaf5fe 0%, #d6e9f9 60%, #c5def4 100%)' }}>
             <Canvas camera={{ position: [0.9, 1.15, 3.3], fov: 32, near: 0.05, far: 20 }} dpr={mini ? [1, 1.25] : [1, 1.75]} gl={{ antialias: true }}>
-                <ambientLight intensity={0.85} />
+                <ambientLight intensity={0.9} />
                 <hemisphereLight args={['#ffffff', '#9ec3e6', 0.7]} />
-                <directionalLight position={[2, 3, 3]} intensity={1.6} />
+                <directionalLight position={[2, 3, 3]} intensity={1.5} />
                 <directionalLight position={[-3, 1.5, -2]} intensity={0.7} color="#bcd9f5" />
                 <Suspense fallback={<Html center><div style={{ fontFamily: 'inherit', fontWeight: 700, color: '#1c5fb2', background: '#fff', borderRadius: 999, padding: '10px 18px', boxShadow: '0 10px 24px -12px rgba(28,95,178,0.5)' }}>Chargement du modèle 3D…</div></Html>}>
-                    <BodyModel layers={layers} />
-                    <Organs zoneDef={zoneDef} visible={layers.organs} onPick={pick} />
-                    {zones.map((z) => <Hotspot key={z.id} z={z} on={z.id === zone} onPick={pick} dotOnly={mini} />)}
+                    <Anatomy layers={layers} zoneDef={zoneDef} onPick={pick} />
+                    <SoftOrgans zoneDef={zoneDef} level={layers.organs} onPick={pick} />
+                    {zones.map((z) => <Hotspot key={z.id} z={{ ...z, alwaysLabel: z.alwaysLabel ?? zones.length <= 4 }} on={z.id === zone} onPick={pick} dotOnly={mini} />)}
                 </Suspense>
                 <CameraRig focus={zone} nonce={nonce} controlsRef={controlsRef} zonesById={zonesById} />
                 <OrbitControls
@@ -237,7 +260,7 @@ export default function Body3D({ zones = ZONES, zone, onZoneChange, height = 760
 
             {mini ? null : (
                 <>
-                    <div style={{ position: 'absolute', left: 16, top: 16, display: 'flex', gap: 6, flexWrap: 'wrap', background: 'rgba(255,255,255,0.82)', padding: 5, borderRadius: 999, boxShadow: '0 12px 28px -14px rgba(28,95,178,0.5)', backdropFilter: 'blur(10px)' }}>
+                    <div style={{ position: 'absolute', left: 16, top: 16, display: 'flex', gap: 6, flexWrap: 'wrap', maxWidth: 'calc(100% - 32px)', background: 'rgba(255,255,255,0.82)', padding: 5, borderRadius: 24, boxShadow: '0 12px 28px -14px rgba(28,95,178,0.5)', backdropFilter: 'blur(10px)' }}>
                         {PRESETS.map((p) => (
                             <button
                                 key={p.id} type="button" onClick={() => setPreset(p.id)}
@@ -257,6 +280,12 @@ export default function Body3D({ zones = ZONES, zone, onZoneChange, height = 760
                     </div>
                 </>
             )}
+        </div>
+        {mini ? null : (
+            <div style={{ fontSize: 11, color: '#64748b', padding: '8px 6px 0', lineHeight: 1.4 }}>
+                Anatomie : BodyParts3D, © The Database Center for Life Science, licence CC BY 4.0. Poumons et foie dessinés en formes translucides.
+            </div>
+        )}
         </div>
     );
 }

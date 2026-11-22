@@ -2031,3 +2031,39 @@ img {
 .ai-popup-bubble .markdown-body > *:last-child {
     margin-bottom: 0;
 }
+/* Les anciens modes (Urgence, Consultation, Suivi, Transfert, Épidémie) gardent leur interligne d'origine dans le nouvel habillage. */
+.aw-legacy {
+    line-height: 1.5;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* ──────────── Raffinement visuel ──────────── */
+.aw-refine {
+    text-rendering: optimizeLegibility;
+    font-kerning: normal;
+    font-variant-numeric: lining-nums;
+}
+.aw-refine h1,
+.aw-refine h2 {
+    text-wrap: balance;
+}
+/* Icônes : un seul trait fin et arrondi partout */
+.aw-refine svg[stroke-width="1.8"],
+.aw-refine svg[stroke-width="2"] {
+    stroke-width: 1.85;
+}
+.aw-refine svg[stroke-linecap="round"] {
+    stroke-linejoin: round;
+}
+.aw-refine ::selection {
+    background: rgba(42, 125, 225, 0.2);
+}
+@media (prefers-reduced-motion: reduce) {
+    .aw-refine *,
+    .aw-refine *::before,
+    .aw-refine *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

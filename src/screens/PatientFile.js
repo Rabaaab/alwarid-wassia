@@ -1,52 +1,120 @@
 'use client';
-import { useState } from 'react';
-import dynamic from 'next/dynamic';
+import { useEffect, useState } from 'react';
 import SmartLink from '@/components/ui/SmartLink';
 import DoctorHeader from '@/components/shell/DoctorHeader';
 import PatientBar from '@/components/shell/PatientBar';
-import PopupAIChat from '@/components/PopupAIChat';
-import { ZONES, ZONE_BY_ID } from '@/data/bodyZones';
-import styles from './PatientFile.module.css';
+import { Ecg, Wave, Spark, Scan } from '@/components/p360/Visuals';
+import { N, V } from '@/components/p360/signals';
+import s from './PatientFile.module.css';
 
-const Body3D = dynamic(() => import('@/components/Body3D'), {
-    ssr: false,
-    loading: () => (
-        <div style={{ height: 760, borderRadius: 28, background: '#dcebf8', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1c5fb2', fontWeight: 700 }}>
-            Chargement du modèle 3D…
-        </div>
-    ),
-});
+const IMG = '/ui/p360/';
+const STRIP = [N(60), N(58), V(52), N(62), N(56), N(60)];
 
-const CHEVRON = (
-    <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
-);
-const pageBg = 'radial-gradient(900px 500px at 12% 0%,rgba(125,189,244,0.55),transparent 70%),radial-gradient(800px 480px at 100% 14%,rgba(186,215,252,0.7),transparent 70%),linear-gradient(180deg,#d3e7fb 0%,#eaf4fd 36%,#f7fbff 100%)';
-const iconBox = { width: 48, height: 48, borderRadius: 16, background: '#e6f1fb', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' };
+/* Body zones: position in % of the body image (patient's left is on the image right). */
+const ZONES = {
+    brain: { label: 'Brain', x: 50, y: 4.5, color: '#2A9BE0', tone: '#1B7FC0', side: 'r' },
+    lungs: { label: 'Lungs', x: 40, y: 23.5, color: '#E02424', tone: '#C21F1F', side: 'l' },
+    heart: { label: 'Heart', x: 58.5, y: 25, color: '#E02424', tone: '#C21F1F', side: 'r' },
+    metabolism: { label: 'Metabolism', x: 50, y: 37, color: '#E08A12', tone: '#B26A0A', side: 'r' },
+    knee: { label: 'Left knee', x: 60, y: 71.5, color: '#22A55A', tone: '#168244', side: 'r' },
+};
 
-function ExamModal({ exam, zone, onClose }) {
-    if (!exam) return null;
+const ICON = {
+    heart: <svg viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2"><path d="M12 21s-7.5-4.6-9.5-9.4C1 7.8 3.6 4 7.2 4c2 0 3.5 1.1 4.8 2.8C13.3 5.1 14.8 4 16.8 4c3.6 0 6.2 3.8 4.7 7.6C19.5 16.4 12 21 12 21z" /></svg>,
+    lungs: <svg viewBox="0 0 24 24" fill="none" stroke="#1C5FB2" strokeWidth="2"><path d="M12 3v8M12 11c-1 2-3 3-5 3M12 11c1 2 3 3 5 3" /><path d="M7 8c-3 1-4 6-4 9 0 2 1 3 3 3s3-2 3-5V9M17 8c3 1 4 6 4 9 0 2-1 3-3 3s-3-2-3-5V9" /></svg>,
+    brain: <svg viewBox="0 0 24 24" fill="none" stroke="#1B7FC0" strokeWidth="2"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 6 0V4a3 3 0 0 0-3 0zM15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-6 0" /></svg>,
+    drop: <svg viewBox="0 0 24 24" fill="none" stroke="#B26A0A" strokeWidth="2"><path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z" /></svg>,
+    bone: <svg viewBox="0 0 24 24" fill="none" stroke="#168244" strokeWidth="2"><path d="M8 4a2 2 0 0 0-3 3 2 2 0 0 0-1 3l10 10a2 2 0 0 0 3 1 2 2 0 0 0 3-3 2 2 0 0 0 1-3L11 5a2 2 0 0 0-3-1z" /></svg>,
+    file: <svg viewBox="0 0 24 24" fill="none" stroke="#1C5FB2" strokeWidth="2"><path d="M6 3h8l4 4v14H6z" /><path d="M14 3v4h4M9 12h6M9 16h6" /></svg>,
+    wave: <svg viewBox="0 0 24 24" fill="none" stroke="#1C5FB2" strokeWidth="2"><path d="M2 12h4l3-7 4 14 3-7h6" /></svg>,
+};
+
+const ecgMedia = (h) => <div className={`${s.ecgBox} ${s.grid}`} style={{ height: h }}><Ecg beats={STRIP} seed={7} /></div>;
+const xray = (h, box) => <Scan src={IMG + 'thorax_final.png'} alt="Chest X-ray" height={h} pos="top" heat={[8, 50, 30, 40]} box={box ? [7, 46, 33, 46] : null} labels={box} />;
+
+/* Cards shown on the right for each zone. 'all' = what the AI flagged on arrival. */
+const CARDS = {
+    all: [
+        { id: 'ecg', title: 'Heart', icon: ICON.heart, chip: ['AI alert', 'red'], media: () => ecgMedia(84), cap: 'ECG model, last 10 s. The highlight shows the trigger.', open: 'Open ECG' },
+        { id: 'xray', title: 'Lungs', icon: ICON.lungs, chip: ['To review', 'amber'], media: () => xray(84, false), cap: 'Chest X-ray model: opacity at the right base.', open: 'Open X-ray' },
+    ],
+    heart: [
+        { id: 'ecg', title: 'ECG · 12 lead', icon: ICON.heart, chip: ['AI · T-MECA', 'violet'], media: () => ecgMedia(130), score: ['Supraventricular beat', 0.93], cap: 'Red band = what triggered the model.', open: 'Open ECG' },
+        { id: 'echo', title: 'Echocardiography', icon: ICON.wave, chip: ['Normal', 'green'], media: () => <Scan src={IMG + 'echo.png'} alt="Echocardiography" height={96} />, cap: '5 Jul 2025 · ejection fraction 55%', open: 'Open report' },
+    ],
+    lungs: [
+        { id: 'xray', title: 'Chest X-ray', icon: ICON.lungs, chip: ['AI · lung model', 'violet'], media: () => xray(150, true), score: ['Opacity, right lower zone', 0.87], cap: 'Heat = where the model looked.', open: 'Open X-ray' },
+        { id: 'spo2', title: 'Oxygen saturation', icon: ICON.wave, chip: ['Low', 'amber'], media: () => <Spark vals={[97, 97, 96, 96, 95, 94, 94, 93]} lo={90} hi={99} target={94} color="#2A9BE0" />, cap: '93% on room air, falling since 08:00', open: 'Open trend' },
+    ],
+    brain: [
+        { id: 'ct', title: 'Brain CT', icon: ICON.brain, chip: ['AI · reviewed', 'violet'], media: () => <Scan src={IMG + 'brain_ct.png'} alt="Brain CT" height={150} />, cap: '10:31 today · no acute bleeding detected. The doctor confirms.', open: 'Open CT' },
+        { id: 'memory', title: 'Memory follow-up', icon: ICON.brain, chip: ['WassIA', 'blue'], media: () => <Spark vals={[62, 60, 61, 57, 55, 52, 50, 46]} lo={40} hi={68} />, cap: 'Weekly speech and memory scores from home.', open: 'Open memory report', href: '/doctor/patient/report' },
+    ],
+    metabolism: [
+        { id: 'hba1c', title: 'HbA1c', icon: ICON.drop, chip: ['Critical', 'red'], media: () => <Spark vals={[6.9, 7.1, 7.2, 7.4, 7.5, 7.8]} lo={6.4} hi={8.2} target={7} color="#DC2626" />, score: ['Last result', '7.8%'], cap: 'Type 2 diabetes since 2016. Target below 7%.', open: 'Open labs', href: '/doctor/patient/labs' },
+        { id: 'abdo', title: 'Abdominal ultrasound', icon: ICON.file, chip: ['Normal', 'green'], media: () => <Scan src={IMG + 'abdo_us.png'} alt="Abdominal ultrasound" height={96} />, cap: '2024 · liver and portal vein normal', open: 'Open report' },
+    ],
+    knee: [
+        { id: 'mri', title: 'Knee MRI', icon: ICON.bone, chip: ['AI · joint model', 'violet'], media: () => <Scan src={IMG + 'knee_mri.png'} alt="Knee MRI" height={150} heat={[36, 38, 30, 34]} />, score: ['Osteoarthritis, grade 2', 0.81], cap: 'Heat = narrowed joint space the model used.', open: 'Open MRI' },
+        { id: 'pain', title: 'Pain treatment', icon: ICON.file, chip: ['Interaction', 'red'], cap: 'Ibuprofen as needed reduces the effect of amlodipine. Paracetamol preferred.', open: 'Open in consultation', href: '/doctor/mode/consultation' },
+    ],
+};
+
+/* Large view when the doctor opens an exam. */
+const DETAIL = {
+    ecg: { title: 'ECG · lead II', zone: 'Heart', big: () => <div className={`${s.ecgBox} ${s.grid}`} style={{ height: 300 }}><Ecg beats={[N(60), N(58), V(52), N(62), N(56), N(60), N(58), N(62)]} seed={9} sw={2.6} /></div>, result: 'Supraventricular ectopic beat · confidence 0.93', why: 'The red band is the part of the signal that triggered the prediction. Model: T-MECA, ResNet18 with multi-spectral attention, Grad-CAM explanation.' },
+    xray: { title: 'Chest X-ray · AP', zone: 'Lungs', big: () => <Scan src={IMG + 'thorax_final.png'} alt="Chest X-ray" height={420} fit="contain" heat={[22, 50, 22, 30]} box={[21, 47, 24, 36]} labels />, result: 'Opacity, right lower zone · 0.87', why: 'The heat shows where the lung model looked. Compare with the previous X-ray and the oxygen level before treatment.' },
+    echo: { title: 'Echocardiography', zone: 'Heart', big: () => <Scan src={IMG + 'echo.png'} alt="Echocardiography" height={420} fit="contain" />, result: 'Ejection fraction 55% · normal', why: 'Report from 5 July 2025, linked automatically to the heart zone.' },
+    ct: { title: 'Brain CT', zone: 'Brain', big: () => <Scan src={IMG + 'brain_ct.png'} alt="Brain CT" height={420} fit="contain" />, result: 'No acute bleeding detected', why: 'The AI review is a reading aid. The doctor confirms every finding.' },
+    abdo: { title: 'Abdominal ultrasound', zone: 'Metabolism', big: () => <Scan src={IMG + 'abdo_us.png'} alt="Abdominal ultrasound" height={420} fit="contain" />, result: 'Liver and portal vein normal', why: 'Report from 2024, linked to the metabolism zone.' },
+    mri: { title: 'Knee MRI', zone: 'Left knee', big: () => <Scan src={IMG + 'knee_mri.png'} alt="Knee MRI" height={420} fit="contain" heat={[38, 36, 26, 30]} />, result: 'Osteoarthritis, grade 2 · 0.81', why: 'The heat shows the narrowed joint space the model used for its prediction.' },
+    spo2: { title: 'Oxygen saturation', zone: 'Lungs', big: () => <div style={{ padding: '20px 10px' }}><Spark vals={[97, 97, 96, 96, 95, 94, 94, 93]} lo={90} hi={99} target={94} color="#2A9BE0" h={220} /></div>, result: '93% on room air', why: 'Falling slowly since 08:00. Below the 94% line.' },
+};
+
+function Card({ c, onOpen }) {
+    const score = c.score;
     return (
-        <div role="dialog" aria-modal="true" aria-label={exam.n} onClick={onClose}
-            style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(15,23,42,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, backdropFilter: 'blur(6px)' }}>
-            <div onClick={(e) => e.stopPropagation()} style={{ width: 'min(920px, 100%)', maxHeight: '92vh', overflow: 'auto', background: '#fff', borderRadius: 36, padding: 28, display: 'flex', flexDirection: 'column', gap: 18, boxShadow: '0 50px 100px -40px rgba(0,0,0,0.6)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 14, justifyContent: 'space-between', flexWrap: 'wrap' }}>
+        <div className={s.zc}>
+            <div className={s.zt}><span className={s.ic}>{c.icon}</span>{c.title}<span className={`${s.chip} ${s[c.chip[1]]}`}>{c.chip[0]}</span></div>
+            {c.media ? <div className={s.media}>{c.media()}</div> : null}
+            {score ? (
+                <>
+                    <div className={s.score}><b>{score[0]}</b><span>{typeof score[1] === 'number' ? score[1].toFixed(2) : score[1]}</span></div>
+                    {typeof score[1] === 'number' ? <div className={s.bar}><i style={{ width: `${score[1] * 100}%` }} /></div> : null}
+                </>
+            ) : null}
+            <div className={s.cap}>{c.cap}</div>
+            {c.href ? (
+                <SmartLink href={c.href} className={s.open}>{c.open} →</SmartLink>
+            ) : (
+                <button type="button" className={s.open} onClick={() => onOpen(c.id)}>{c.open} →</button>
+            )}
+        </div>
+    );
+}
+
+function Detail({ id, onClose }) {
+    const d = DETAIL[id];
+    if (!d) return null;
+    return (
+        <div role="dialog" aria-modal="true" aria-label={d.title} className={s.modalBg} onClick={onClose}>
+            <div className={s.modal} onClick={(e) => e.stopPropagation()}>
+                <div className={s.mHead}>
                     <div>
-                        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#475569' }}>{zone.label}</div>
-                        <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.03em' }}>{exam.n}</div>
-                        <div style={{ fontSize: 15, color: '#475569', marginTop: 2 }}>{exam.d}</div>
+                        <div className={s.kick}>{d.zone}</div>
+                        <div className={s.mTitle}>{d.title}</div>
                     </div>
-                    <button type="button" onClick={onClose} style={{ minHeight: 48, padding: '0 22px', borderRadius: 999, border: '1px solid #bfdbfe', background: '#fff', color: '#1c5fb2', fontSize: 15, fontWeight: 700 }}>Fermer</button>
+                    <button type="button" className={s.ghost} onClick={onClose}>Close</button>
                 </div>
-                <div style={{ background: '#0b1220', borderRadius: 24, padding: 12, display: 'flex', justifyContent: 'center' }}>
-                    <img src={exam.img} alt={`${exam.n}, ${exam.d}`} style={{ maxWidth: '100%', maxHeight: '58vh', objectFit: 'contain', borderRadius: 14 }} />
-                </div>
-                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ fontSize: 13, color: '#475569', maxWidth: 520, lineHeight: 1.5 }}>
-                        Document de démonstration. L&apos;interprétation automatique est une aide à la lecture, le médecin décide.
+                <div className={s.mMedia}>{d.big()}</div>
+                <div className={s.mResult}><span className={`${s.chip} ${s.violet}`}>Explainable AI</span><b>{d.result}</b></div>
+                <div className={s.mWhy}>{d.why}</div>
+                <div className={s.mFoot}>
+                    <span>Decision support. The doctor always decides.</span>
+                    <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                        <button type="button" className={s.ghost} onClick={onClose}>Doctor validates</button>
+                        <SmartLink href="/doctor/mode/consultation" className={s.primary}>Discuss in consultation →</SmartLink>
                     </div>
-                    <SmartLink href="/doctor/mode/consultation" style={{ minHeight: 52, padding: '0 26px', borderRadius: 999, background: 'linear-gradient(135deg,#2a7de1,#1c5fb2)', color: '#fff', fontSize: 15, fontWeight: 700, display: 'inline-flex', alignItems: 'center', textDecoration: 'none', boxShadow: '0 16px 30px -12px rgba(28,95,178,0.65)' }}>
-                        Analyser dans Consultation
-                    </SmartLink>
                 </div>
             </div>
         </div>
@@ -54,142 +122,121 @@ function ExamModal({ exam, zone, onClose }) {
 }
 
 export default function PatientFile() {
-    const [zoneId, setZoneId] = useState(null);
-    const [exam, setExam] = useState(null);
-    const zone = zoneId ? ZONE_BY_ID[zoneId] : null;
+    const [zone, setZone] = useState('all');
+    const [open, setOpen] = useState(null);
+    const [found, setFound] = useState(false);
+    useEffect(() => {
+        const t = setTimeout(() => setFound(true), 1600);
+        return () => clearTimeout(t);
+    }, []);
+    const cards = CARDS[zone] || CARDS.all;
 
     return (
-        <div className={styles.root} style={{ minHeight: 1060, boxSizing: 'border-box', fontFamily: "'Plus Jakarta Sans',system-ui,sans-serif", color: '#0f172a', background: pageBg, padding: '24px 32px 48px' }}>
-            <div style={{ maxWidth: 1240, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
+        <div className={s.page}>
+            <div className={s.wrap}>
                 <DoctorHeader active="Patients" />
                 <PatientBar active="dossier" />
-                <div className={styles.cols} style={{ display: 'flex', gap: 24, alignItems: 'stretch' }}>
-                    <div className={styles.rise} style={{ flex: 1.3, minWidth: 0, background: '#ffffff', borderRadius: 40, padding: 26, boxShadow: '0 30px 60px -36px rgba(28,95,178,0.45)', display: 'flex', flexWrap: 'wrap', gap: 24, alignItems: 'flex-start' }}>
-                        <div style={{ flex: '0 0 280px', maxWidth: '100%', display: 'flex', flexDirection: 'column', gap: 14 }}>
-                            <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#475569' }}>{zone ? 'Zone sélectionnée' : 'Corps entier'}</div>
-                            {zone ? (
-                                <>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                        <span style={{ width: 14, height: 14, borderRadius: '50%', background: zone.color, display: 'inline-block', flex: 'none' }} />
-                                        <span style={{ fontSize: 30, fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.05 }}>{zone.label}</span>
-                                    </div>
-                                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                                        <span className={styles.tag} style={{ background: zone.bg, color: zone.tone }}>{zone.sub}</span>
-                                        <span style={{ fontSize: 13, color: '#475569' }}>{zone.items.length} {zone.items.length > 1 ? 'examens liés' : 'examen lié'}</span>
-                                    </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 4 }}>
-                                        {zone.items.map((it) => {
-                                            const inner = (
-                                                <>
-                                                    <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
-                                                        <div style={{ fontWeight: 700, fontSize: 15 }}>{it.n}</div>
-                                                        <div style={{ fontSize: 13, color: '#475569', marginTop: 1 }}>{it.d}</div>
-                                                    </div>
-                                                    {it.tag ? <span className={styles.tag} style={{ background: '#e6f1fb', color: '#196185' }}>{it.tag}</span> : null}
-                                                    {CHEVRON}
-                                                </>
-                                            );
-                                            return it.href ? (
-                                                <SmartLink key={it.n} href={it.href} className={styles.rowp} style={{ background: '#f5faff' }}>{inner}</SmartLink>
-                                            ) : (
-                                                <button key={it.n} type="button" onClick={() => setExam(it)} className={styles.rowp} style={{ background: '#f5faff', border: 'none', width: '100%', cursor: 'pointer', fontFamily: 'inherit' }}>{inner}</button>
-                                            );
-                                        })}
-                                    </div>
-                                    <button type="button" onClick={() => setZoneId(null)} style={{ marginTop: 6, minHeight: 44, borderRadius: 999, border: '1px solid #bfdbfe', background: '#fff', color: '#1c5fb2', fontWeight: 700, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>
-                                        Revenir au corps entier
-                                    </button>
-                                </>
-                            ) : (
-                                <>
-                                    <div style={{ fontSize: 24, fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.15 }}>Touchez une zone pour voir ses examens</div>
-                                    <div style={{ fontSize: 14, color: '#475569', lineHeight: 1.55 }}>Faites tourner le corps, zoomez, puis changez de couche pour voir les muscles, le squelette et les organes.</div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 4 }}>
-                                        {ZONES.map((z) => (
-                                            <button key={z.id} type="button" onClick={() => setZoneId(z.id)} className={styles.rowp} style={{ background: '#f5faff', border: 'none', width: '100%', cursor: 'pointer', fontFamily: 'inherit' }}>
-                                                <span style={{ width: 14, height: 14, borderRadius: '50%', background: z.color, flex: 'none' }} />
-                                                <span style={{ flex: 1, textAlign: 'left', fontWeight: 700, fontSize: 15 }}>{z.label}</span>
-                                                <span className={styles.tag} style={{ background: z.bg, color: z.tone }}>{z.sub}</span>
-                                                {CHEVRON}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </>
-                            )}
+
+                <div className={`${s.alert} ${found ? s.found : ''}`} aria-live="polite">
+                    {found ? (
+                        <>
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" aria-hidden="true"><path d="M12 3l10 18H2z" /><path d="M12 10v5M12 18v.5" /></svg>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                                <div className={s.kick} style={{ color: '#DC2626' }}>Severe antibiotic allergy · read this first</div>
+                                <div className={s.alertTitle}>Penicillin family (amoxicillin): anaphylaxis</div>
+                                <div className={s.alertSub}>Found in an old report: discharge report, 12 March 2014, page 37 of 52</div>
+                            </div>
+                            <SmartLink href="/doctor/mode/consultation" className={s.primary}>Consultation →</SmartLink>
+                        </>
+                    ) : (
+                        <>
+                            <span className={s.spin} aria-hidden="true" />
+                            <div className={s.kick}>Critical alerts</div>
+                            <div className={s.alertSub} style={{ fontSize: 15, fontWeight: 600 }}>Reading 12 years of records...</div>
+                        </>
+                    )}
+                </div>
+
+                <div className={s.main}>
+                    <div className={s.left}>
+                        <div className={s.mon}>
+                            <div className={s.monHd}><span className={s.live} />EMERGENCY · BAY 4<span className={s.monTime}>25 mm/s · live</span></div>
+                            <div className={s.row}>
+                                <div className={`${s.wbox} ${s.grid}`} style={{ height: 140 }}><span className={s.wlab}>ECG II</span><Ecg beats={[N(64), N(60), V(56), N(66), N(58), N(62)]} seed={11} amp={0.6} base={0.64} /></div>
+                                <div className={s.read}><div className={s.rk} style={{ color: '#3BE58E' }}>HR <span>bpm</span></div><div className={s.rv} style={{ color: '#3BE58E', fontSize: 'clamp(40px,4.2vw,62px)' }}>104</div><div className={s.rs}>Irregular rhythm</div></div>
+                            </div>
+                            <div className={s.row}>
+                                <div className={`${s.wbox} ${s.grid}`} style={{ height: 84 }}><span className={s.wlab}>PLETH</span><Wave kind="pleth" color="#45D2FF" /></div>
+                                <div className={s.read}><div className={s.rk} style={{ color: '#45D2FF' }}>SpO₂ <span>%</span></div><div className={s.rv} style={{ color: '#45D2FF' }}>93</div><div className={s.rs}>Room air</div></div>
+                            </div>
+                            <div className={s.row}>
+                                <div className={`${s.wbox} ${s.grid}`} style={{ height: 76 }}><span className={s.wlab} style={{ color: '#FFD84A' }}>RESP</span><Wave kind="resp" color="#FFD84A" /></div>
+                                <div className={s.read}><div className={s.rk} style={{ color: '#FFD84A' }}>RR <span>/min</span></div><div className={s.rv} style={{ color: '#FFD84A' }}>22</div><div className={s.rs}>Fast breathing</div></div>
+                            </div>
                         </div>
-                        <div style={{ flex: '1 1 380px', minWidth: 300 }}>
-                            <Body3D zone={zoneId} onZoneChange={setZoneId} height={760} />
+                        <div className={s.xai}>
+                            <div className={s.xaiTop}>
+                                <span className={`${s.chip} ${s.blue}`}>✦ Explainable AI · T-MECA</span>
+                                <button type="button" className={s.primary} onClick={() => setOpen('ecg')}>Explain</button>
+                            </div>
+                            <div className={s.xaiT}>Abnormal beat: supraventricular, 0.93</div>
+                            <div className={s.xaiS}>The red band is exactly what triggered the prediction</div>
+                        </div>
+                        <div className={s.tiles}>
+                            <div className={s.tile}><small>BP</small><b>138/82</b><em style={{ color: '#B4510B' }}>Raised · mmHg</em></div>
+                            <div className={s.tile}><small>TEMP</small><b>38.4</b><i>°C</i><em style={{ color: '#B4510B' }}>Fever</em></div>
+                            <div className={`${s.tile} ${s.tileRed}`}><small>GCS</small><b>9</b><i>/15</i><em style={{ color: '#C21F1F' }}>Unconscious</em></div>
+                            <div className={`${s.tile} ${s.tileRed}`}><small>NEWS2</small><b style={{ color: '#C21F1F' }}>9</b><em style={{ color: '#C21F1F' }}>High, act now</em></div>
                         </div>
                     </div>
 
-                    <div style={{ flex: 0.7, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
-                        <div className={`${styles.panel} ${styles.rise}`} style={{ animationDelay: '80ms' }}>
-                            <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.02em', marginBottom: 14 }}>À savoir</div>
-                            <div style={{ fontSize: 13, fontWeight: 700, color: '#475569', marginBottom: 8 }}>Allergies</div>
-                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                                {['Pénicilline', 'Sulfamides'].map((a) => (
-                                    <span key={a} style={{ fontSize: 17, fontWeight: 700, background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca', borderRadius: 16, padding: '9px 16px' }}>{a}</span>
-                                ))}
+                    <div className={s.stage}>
+                        <div className={s.bodyCol}>
+                            <div className={s.layers} aria-label="Body layers"><span className={s.on}>All</span><span>Muscles</span><span>Skeleton</span><span>Organs</span></div>
+                            <div className={s.bodyWrap}>
+                                <img src={IMG + 'body_mus.png'} alt="Body map of the patient" className={s.bodyImg} />
+                                {Object.entries(ZONES).map(([k, z]) => {
+                                    const on = zone === k;
+                                    return (
+                                        <div key={k}>
+                                            {on ? <span className={s.halo} style={{ left: `${z.x}%`, top: `${z.y}%`, background: `${z.color}22`, borderColor: `${z.color}88` }} /> : null}
+                                            <button type="button" aria-label={z.label} className={`${s.pin} ${on ? s.pinOn : ''}`} style={{ left: `${z.x}%`, top: `${z.y}%`, background: z.color, color: z.color }} onClick={() => setZone(on ? 'all' : k)} />
+                                            <button type="button" className={`${s.plab} ${z.side === 'l' ? s.plabL : ''}`} style={{ left: `${z.x}%`, top: `${z.y}%`, color: on ? '#fff' : z.tone, background: on ? z.color : '#fff' }} onClick={() => setZone(on ? 'all' : k)}>{z.label}</button>
+                                        </div>
+                                    );
+                                })}
                             </div>
-                            <SmartLink href="/doctor/mode/urgence" className={styles.rowp} style={{ marginTop: 12 }}>
-                                <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#dc2626', flex: 'none' }} />
-                                <span style={{ flex: 1, fontSize: 15, fontWeight: 600 }}>2 interactions médicamenteuses critiques</span>
-                                {CHEVRON}
-                            </SmartLink>
                         </div>
-                        <div className={`${styles.panel} ${styles.rise}`} style={{ animationDelay: '120ms', padding: '14px 16px' }}>
-                            <SmartLink href="/doctor/patient/team" className={styles.rowp}>
-                                <div style={{ display: 'flex', flex: 'none' }}>
-                                    {['doctor-avatar', 'doc-tazi', 'doc-fassi', 'doc-zniber'].map((n, i) => (
-                                        <img key={n} src={`/ui/${n}.jpg`} alt="" style={{ marginLeft: i ? -12 : 0, width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', border: '3px solid #ffffff', boxSizing: 'border-box' }} />
-                                    ))}
+                        <div className={s.cards}>
+                            {zone === 'all' ? (
+                                <div className={s.zHead}><span className={s.kick}>Flagged by the AI on arrival</span></div>
+                            ) : (
+                                <div className={s.zHead}>
+                                    <span className={s.zDot} style={{ background: ZONES[zone].color }} />
+                                    <span className={s.zName}>{ZONES[zone].label}</span>
+                                    <span className={s.zSub}>linked exams and their AI models</span>
                                 </div>
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                    <div style={{ fontWeight: 700, fontSize: 16 }}>Équipe de soins</div>
-                                    <div style={{ fontSize: 13, color: '#475569' }}>4 médecins, 2 cliniques</div>
-                                </div>
-                                {CHEVRON}
-                            </SmartLink>
-                            <SmartLink href="/doctor/patient/labs" className={styles.rowp}>
-                                <div style={iconBox}><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1c5fb2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3" /></svg></div>
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                    <div style={{ fontWeight: 700, fontSize: 16 }}>Analyses</div>
-                                    <div style={{ fontSize: 13, color: '#475569' }}>6 résultats, 2 laboratoires</div>
-                                </div>
-                                <span className={styles.tag} style={{ background: '#fef2f2', color: '#b91c1c' }}>3 hors norme</span>
-                                {CHEVRON}
-                            </SmartLink>
-                        </div>
-                        <div className={`${styles.panel} ${styles.rise}`} style={{ animationDelay: '160ms' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                                <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.02em' }}>À examiner</span>
-                                <span className={styles.tag} style={{ background: '#e6f1fb', color: '#196185' }}>2</span>
-                            </div>
-                            <SmartLink href="/doctor/patient/report" className={styles.rowp}>
-                                <div style={iconBox}><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1c5fb2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="3" width="6" height="12" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3" /></svg></div>
-                                <div style={{ flex: 1, minWidth: 0 }}><div style={{ fontWeight: 700, fontSize: 16 }}>Rapport mémoire</div><div style={{ fontSize: 13, color: '#475569' }}>WassIA, hier soir</div></div>
-                                <span className={styles.tag} style={{ background: '#e6f1fb', color: '#196185' }}>Nouveau</span>
-                            </SmartLink>
-                            <SmartLink href="/doctor/results" className={styles.rowp}>
-                                <div style={iconBox}><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1c5fb2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="3" /><path d="M3 8l9 6 9-6" /></svg></div>
-                                <div style={{ flex: 1, minWidth: 0 }}><div style={{ fontWeight: 700, fontSize: 16 }}>Demande d&apos;avis</div><div style={{ fontSize: 13, color: '#475569' }}>Dr. Tazi, médecin traitant</div></div>
-                            </SmartLink>
-                        </div>
-                        <div className={styles.rise} style={{ display: 'flex', flexDirection: 'column', gap: 12, animationDelay: '240ms' }}>
-                            <SmartLink href="/doctor/patient/note" style={{ minHeight: 62, borderRadius: 24, background: 'linear-gradient(135deg,#2a7de1,#1c5fb2)', color: '#ffffff', fontSize: 17, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, boxShadow: '0 20px 38px -14px rgba(28,95,178,0.65)', textDecoration: 'none' }}>
-                                <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="3" width="6" height="12" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3" /></svg>
-                                Note de consultation
-                            </SmartLink>
-                            <SmartLink href="/doctor/patient/rx" style={{ minHeight: 62, borderRadius: 24, border: '1px solid #bfdbfe', background: '#ffffff', color: '#1c5fb2', fontSize: 17, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
-                                Nouvelle ordonnance
-                            </SmartLink>
+                            )}
+                            {cards.map((c) => <Card key={zone + c.id} c={c} onOpen={setOpen} />)}
+                            {zone === 'all' ? (
+                                <div className={s.hint}>Tap a zone on the body: its AI model and exams open</div>
+                            ) : (
+                                <button type="button" className={s.hint} onClick={() => setZone('all')}>← Whole body</button>
+                            )}
                         </div>
                     </div>
                 </div>
-                <div style={{ fontSize: 12, color: '#475569', textAlign: 'center' }}>Aide à la décision. La décision finale revient au médecin. Données de démonstration.</div>
+
+                <div className={s.links}>
+                    <SmartLink href="/doctor/patient/team" className={s.link}><span className={s.ic}>{ICON.file}</span>Care team</SmartLink>
+                    <SmartLink href="/doctor/patient/labs" className={s.link}><span className={s.ic}>{ICON.drop}</span>Lab results<span className={`${s.chip} ${s.red}`}>3 out of range</span></SmartLink>
+                    <SmartLink href="/doctor/patient/report" className={s.link}><span className={s.ic}>{ICON.brain}</span>Memory report<span className={`${s.chip} ${s.blue}`}>New</span></SmartLink>
+                    <SmartLink href="/doctor/patient/note" className={s.link}><span className={s.ic}>{ICON.wave}</span>Consultation note</SmartLink>
+                    <SmartLink href="/doctor/patient/rx" className={s.link}><span className={s.ic}>{ICON.file}</span>New prescription</SmartLink>
+                </div>
+                <div className={s.foot}>Decision support. The doctor always decides. Demonstration data, fictional patient.</div>
             </div>
-            <ExamModal exam={exam} zone={zone || ZONES[0]} onClose={() => setExam(null)} />
-            <PopupAIChat mode="consultation" />
+            <Detail id={open} onClose={() => setOpen(null)} />
         </div>
     );
 }
